@@ -1,19 +1,76 @@
 {
-  "name": "@fustilio/xmk-introspect-root",
-  "version": "0.0.0",
+  "name": "@fustilio/xml-introspect-root",
+  "version": "0.1.0",
   "private": true,
+  "description": "A powerful CLI tool and library for analyzing large XML files and generating representative samples with identical structure",
+  "keywords": [
+    "xml",
+    "xsd",
+    "introspect",
+    "analysis",
+    "sampling",
+    "wordnet",
+    "lmf",
+    "cli",
+    "typescript",
+    "data-processing"
+  ],
+  "author": "fustilio",
   "license": "MIT",
+  "homepage": "https://github.com/fustilio/xml-introspect#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fustilio/xml-introspect.git"
+  },
+  "bugs": {
+    "url": "https://github.com/fustilio/xml-introspect/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
   "scripts": {
+    "build": "pnpm --filter ./packages/* build",
+    "test": "pnpm --filter ./packages/* test",
+    "test:coverage": "pnpm --filter ./packages/* test:coverage",
+    "test:watch": "pnpm --filter ./packages/* test:watch",
+    "test:ui": "pnpm --filter ./packages/* test:ui",
+    "lint": "pnpm --filter ./packages/* lint",
+    "format": "prettier --write \"**/*.{ts,js,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,js,json,md}\"",
+    "clean": "pnpm --filter ./packages/* clean && rm -rf node_modules/.cache",
+    "dev": "pnpm --filter ./packages/* dev",
+    "demo": "pnpm --filter @fustilio/xml-introspect demo:faker",
+    "demo:schema": "pnpm --filter @fustilio/xml-introspect demo:schema",
     "publish-packages": "pnpm publish --filter ./packages/* --access public",
-    "test": "pnpm --filter ./packages/* test"
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "changeset publish"
   },
   "lint-staged": {
-    "*": "prettier --fix"
+    "*.{ts,js}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
   },
   "devDependencies": {
+    "@changesets/cli": "^2.27.1",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
     "cross-env": "^7.0.3",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
     "husky": "^8.0.3",
-    "lint-staged": "^15.2.8"
+    "lint-staged": "^15.2.8",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
   },
-  "packageManager": "pnpm@9.5.0"
+  "packageManager": "pnpm@9.5.0",
+  "workspaces": [
+    "packages/*"
+  ]
 }
