@@ -22,7 +22,7 @@
   "exports": {
     ".": {
       "default": "./src/index.ts"
-    }, 
+    },
     "./browser": {
       "default": "./src/browser/index.ts"
     }
@@ -49,6 +49,7 @@
     "@types/xast": "^2.0.4",
     "@vitest/coverage-v8": "catalog:",
     "@vitest/ui": "catalog:",
+    "execa": "^9.6.0",
     "typescript": "^5.0.0",
     "vite": "catalog:",
     "vitest": "catalog:"

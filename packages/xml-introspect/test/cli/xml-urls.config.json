@@ -1,0 +1,13 @@
+{
+  "xmlUrls": [
+    "https://en-word.net/static/english-wordnet-2024.xml.gz",
+    "https://github.com/globalwordnet/english-wordnet/releases/download/2024-edition/english-wordnet-2024.xml.gz",
+    "https://en-word.net/static/english-wordnet-2023.xml.gz",
+    "https://github.com/globalwordnet/english-wordnet/releases/download/2023-edition/english-wordnet-2023.xml.gz",
+    "https://en-word.net/static/english-wordnet-2022.xml.gz",
+    "https://github.com/globalwordnet/english-wordnet/releases/download/2022-edition/english-wordnet-2022.xml.gz",
+    "https://en-word.net/static/english-wordnet-2021.xml.gz",
+    "https://en-word.net/static/english-wordnet-2020.xml.gz",
+    "https://en-word.net/static/english-wordnet-2019.xml.gz"
+  ]
+}
