@@ -11,7 +11,10 @@
     "test:ui": "vitest --ui",
     "test:schema": "vitest run test/schema-consistency.test.ts --reporter=verbose",
     "bench": "vitest bench --run bench/xml-introspect.bench.ts",
-    "build": "vite build",
+    "build": "rimraf dist && pnpm build:node && pnpm build:browser && pnpm build:cli",
+    "build:node": "vite build --config vite.node.config.ts",
+    "build:browser": "vite build --config vite.browser.config.ts",
+    "build:cli": "vite build --config vite.cli.config.ts",
     "dev": "vite build --watch",
     "cli": "node dist/cli.js",
     "demo:faker": "node scripts/faker-demo.js",
@@ -21,15 +24,15 @@
   },
   "exports": {
     ".": {
-      "default": "./src/index.ts"
+      "default": "./dist/index.js"
     },
     "./browser": {
-      "default": "./src/browser/index.ts"
+      "default": "./dist/browser.js"
     }
   },
   "dependencies": {
-    "@xml-introspect/data-loader": "workspace:*",
     "@faker-js/faker": "^9.9.0",
+    "@xml-introspect/data-loader": "workspace:*",
     "deep-equal": "^2.2.3",
     "sax": "^1.4.1",
     "unist-util-filter": "^5.0.1",
@@ -51,6 +54,7 @@
     "@vitest/coverage-v8": "catalog:",
     "@vitest/ui": "catalog:",
     "execa": "^9.6.0",
+    "rimraf": "^6.0.1",
     "typescript": "^5.0.0",
     "vite": "catalog:",
     "vitest": "catalog:"

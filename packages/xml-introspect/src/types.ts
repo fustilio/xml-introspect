@@ -113,6 +113,7 @@ export interface XSDFromXMLOptions {
   attributeForm?: 'qualified' | 'unqualified';
   includeDocumentation?: boolean;
   inferTypes?: boolean;
+  verbose?: boolean;
 }
 
 export interface XMLFromXSDOptions {

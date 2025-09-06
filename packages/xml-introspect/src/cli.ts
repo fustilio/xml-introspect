@@ -18,6 +18,17 @@ interface CLIOptions {
   elementForm?: 'qualified' | 'unqualified';
   attributeForm?: 'qualified' | 'unqualified';
   help?: boolean;
+  verbose?: boolean;
+}
+
+// Global verbose flag
+let verbose = false;
+
+// Helper function for verbose logging
+function logVerbose(message: string) {
+  if (verbose) {
+    console.log(message);
+  }
 }
 
 function printHelp() {
@@ -46,6 +57,7 @@ Options:
   -n, --namespace <url>        Target namespace for XSD generation
   --element-form <type>        Element form default (qualified/unqualified)
   --attribute-form <type>      Attribute form default (qualified/unqualified)
+  -v, --verbose                Enable verbose output
   -h, --help                   Show this help message
 
 Examples:
@@ -133,6 +145,11 @@ function parseArgs(args: string[]): CLIOptions {
         options.attributeForm = args[++i] as 'qualified' | 'unqualified';
         break;
         
+      case '-v':
+      case '--verbose':
+        options.verbose = true;
+        break;
+        
       case '-h':
       case '--help':
         options.help = true;
@@ -145,41 +162,45 @@ function parseArgs(args: string[]): CLIOptions {
 
 async function runCommand(options: CLIOptions) {
   try {
+    // Set global verbose flag
+    verbose = options.verbose || false;
+    
     console.log(`🚀 Starting XML Introspector CLI...`);
-    console.log(`📁 Input file: ${options.input}`);
-    console.log(`📄 Output file: ${options.output || 'stdout'}`);
-    console.log(`🔧 Command: ${options.command}`);
-    console.log('');
+    logVerbose(`📁 Input file: ${options.input}`);
+    logVerbose(`📄 Output file: ${options.output || 'stdout'}`);
+    logVerbose(`🔧 Command: ${options.command}`);
+    logVerbose('');
 
     const introspector = new XMLIntrospector();
     
     switch (options.command) {
       case 'schema':
-        console.log('🔄 Generating XSD schema from XML...');
-        console.log('⏳ This may take a while for large files...');
+        logVerbose('🔄 Generating XSD schema from XML...');
+        logVerbose('⏳ This may take a while for large files...');
         
         const startTime = Date.now();
         const xsd = await introspector.generateXSDFromXML(options.input!, {
           targetNamespace: options.namespace,
           elementForm: options.elementForm as 'qualified' | 'unqualified',
-          attributeForm: options.attributeForm as 'qualified' | 'unqualified'
+          attributeForm: options.attributeForm as 'qualified' | 'unqualified',
+          verbose: options.verbose
         });
         
         const endTime = Date.now();
         const duration = (endTime - startTime) / 1000;
         
-        console.log(`✅ XSD generation completed in ${duration.toFixed(2)} seconds`);
-        console.log(`📊 Generated XSD size: ${(xsd.length / 1024).toFixed(2)} KB`);
+        logVerbose(`✅ XSD generation completed in ${duration.toFixed(2)} seconds`);
+        logVerbose(`📊 Generated XSD size: ${(xsd.length / 1024).toFixed(2)} KB`);
         
         if (options.output) {
           writeFileSync(options.output, xsd);
-          console.log(`💾 XSD saved to: ${options.output}`);
+          logVerbose(`💾 XSD saved to: ${options.output}`);
         } else {
           console.log('\n📋 Generated XSD:');
           console.log('─'.repeat(50));
           console.log(xsd);
         }
-        console.log('\n✅ Command completed successfully');
+        console.log('✅ Command completed successfully');
         process.exit(0);
         break;
         
@@ -195,11 +216,11 @@ async function runCommand(options: CLIOptions) {
         
         if (options.output) {
           writeFileSync(options.output, sample, 'utf8');
-          console.log(`✅ Sample XML written to ${options.output}`);
+          logVerbose(`✅ Sample XML written to ${options.output}`);
         } else {
           console.log(sample);
         }
-        console.log('\n✅ Command completed successfully');
+        console.log('✅ Command completed successfully');
         process.exit(0);
         break;
         
@@ -225,11 +246,11 @@ async function runCommand(options: CLIOptions) {
         
         if (options.output) {
           writeFileSync(options.output, xml, 'utf8');
-          console.log(`✅ Generated XML written to ${options.output}`);
+          logVerbose(`✅ Generated XML written to ${options.output}`);
         } else {
           console.log(xml);
         }
-        console.log('\n✅ Command completed successfully');
+        console.log('✅ Command completed successfully');
         process.exit(0);
         break;
         
@@ -247,11 +268,11 @@ async function runCommand(options: CLIOptions) {
         
         if (options.output) {
           writeFileSync(options.output, result, 'utf8');
-          console.log(`✅ Roundtrip XML written to ${options.output}`);
+          logVerbose(`✅ Roundtrip XML written to ${options.output}`);
         } else {
           console.log(result);
         }
-        console.log('\n✅ Command completed successfully');
+        console.log('✅ Command completed successfully');
         process.exit(0);
         break;
         
@@ -283,8 +304,8 @@ async function runCommand(options: CLIOptions) {
           );
         }
         
-        console.log(`✅ Expanded XML written to ${options.output}`);
-        console.log('\n✅ Command completed successfully');
+        logVerbose(`✅ Expanded XML written to ${options.output}`);
+        console.log('✅ Command completed successfully');
         process.exit(0);
         break;
         
@@ -302,11 +323,11 @@ async function runCommand(options: CLIOptions) {
         
         if (options.output) {
           writeFileSync(options.output, realisticXML, 'utf8');
-          console.log(`✅ Realistic XML written to ${options.output}`);
+          logVerbose(`✅ Realistic XML written to ${options.output}`);
         } else {
           console.log(realisticXML);
         }
-        console.log('\n✅ Command completed successfully');
+        console.log('✅ Command completed successfully');
         process.exit(0);
         break;
         
@@ -325,7 +346,7 @@ async function runCommand(options: CLIOptions) {
             console.log(`  - ${error.message}`);
           });
         }
-        console.log('\n✅ Command completed successfully');
+        console.log('✅ Command completed successfully');
         process.exit(0);
         break;
         

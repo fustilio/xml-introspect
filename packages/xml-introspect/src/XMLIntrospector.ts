@@ -67,7 +67,7 @@ export class XMLIntrospector {
     });
     
     const xsdPromise = (async () => {
-      const structure = await this.analyzeStructure(filePath);
+      const structure = await this.analyzeStructure(filePath, options.verbose);
       return this.buildXSD(structure, options);
     })();
     
@@ -153,25 +153,25 @@ export class XMLIntrospector {
   /**
    * Analyze the structure of an XML file
    */
-  async analyzeStructure(filePath: string): Promise<XMLStructure> {
+  async analyzeStructure(filePath: string, verbose: boolean = false): Promise<XMLStructure> {
     const stats = statSync(filePath);
     const fileSizeMB = (stats.size / (1024 * 1024)).toFixed(1);
-    console.log(`📊 Analyzing XML file: ${fileSizeMB} MB`);
+    if (verbose) console.log(`📊 Analyzing XML file: ${fileSizeMB} MB`);
     
     const isLargeFile = stats.size > LARGE_FILE_THRESHOLD_BYTES;
 
     if (isLargeFile) {
-      console.log('🔄 Using streaming analysis for large file...');
-      return this._analyzeStructureStreaming(filePath);
+      if (verbose) console.log('🔄 Using streaming analysis for large file...');
+      return this._analyzeStructureStreaming(filePath, verbose);
     }
     
-    console.log('🔄 Using in-memory analysis...');
+    if (verbose) console.log('🔄 Using in-memory analysis...');
     try {
       const xmlContent = readFileSync(filePath, 'utf8');
-      console.log('📖 XML file loaded into memory');
+      if (verbose) console.log('📖 XML file loaded into memory');
       
       const xast = fromXml(xmlContent);
-      console.log('🔍 Parsing XML structure...');
+      if (verbose) console.log('🔍 Parsing XML structure...');
 
       const elementTypes = new Map<string, ElementTypeInfo>();
       const namespaces = new Map<string, string>();
@@ -1579,8 +1579,8 @@ export class XMLIntrospector {
   /**
    * Analyze the structure of a large XML file using a streaming approach to avoid high memory usage.
    */
-  private async _analyzeStructureStreaming(filePath: string): Promise<XMLStructure> {
-    console.log('🌊 Starting streaming XML analysis...', filePath);
+  private async _analyzeStructureStreaming(filePath: string, verbose: boolean = false): Promise<XMLStructure> {
+    if (verbose) console.log('🌊 Starting streaming XML analysis...', filePath);
     const saxStream = sax.createStream(true, { xmlns: false, position: false, trim: true, normalize: true });
     const fileStream = createReadStream(filePath, { encoding: 'utf-8' });
     const elementTypes = new Map<string, ElementTypeInfo>();
@@ -1612,7 +1612,7 @@ export class XMLIntrospector {
             // Show progress every 5 seconds
             const now = Date.now();
             if (now - lastProgressUpdate > progressInterval) {
-                console.log(`📈 Processed ${totalElements.toLocaleString()} elements...`);
+                if (verbose) console.log(`📈 Processed ${totalElements.toLocaleString()} elements...`);
                 lastProgressUpdate = now;
             }
             
@@ -1680,11 +1680,13 @@ export class XMLIntrospector {
 
         saxStream.on('end', () => {
             clearTimeout(timeout);
-            console.log(`✅ Streaming analysis completed!`);
-            console.log(`📊 Total elements processed: ${totalElements.toLocaleString()}`);
-            console.log(`🌳 Root element: ${rootElement}`);
-            console.log(`📏 Maximum depth: ${maxDepth}`);
-            console.log(`🏷️  Element types found: ${elementTypes.size}`);
+            if (verbose) {
+                console.log(`✅ Streaming analysis completed!`);
+                console.log(`📊 Total elements processed: ${totalElements.toLocaleString()}`);
+                console.log(`🌳 Root element: ${rootElement}`);
+                console.log(`📏 Maximum depth: ${maxDepth}`);
+                console.log(`🏷️  Element types found: ${elementTypes.size}`);
+            }
             resolve({
                 rootElement,
                 elementTypes,
