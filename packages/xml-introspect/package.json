@@ -1,6 +1,6 @@
 {
-  "name": "xml-introspect",
-  "version": "0.5.0",
+  "name": "@fustilio/xml-introspect",
+  "version": "0.1.0",
   "license": "MIT",
   "author": "fustilio",
   "type": "module",
