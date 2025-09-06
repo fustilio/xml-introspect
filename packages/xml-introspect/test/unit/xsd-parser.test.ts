@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { writeFileSync, unlinkSync, existsSync, mkdirSync, rmdirSync } from 'fs';
 import { join } from 'path';
-import { XSDParser } from '../src/XSDParser';
+import { XSDParser } from '../../src/XSDParser';
 
 describe('XSD Parser and Unified XAST', () => {
   let parser: XSDParser;

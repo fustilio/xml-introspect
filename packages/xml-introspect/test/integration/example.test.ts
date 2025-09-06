@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { XMLIntrospector } from '../src/XMLIntrospector';
+import { XMLIntrospector } from '../../src/XMLIntrospector';
 
 describe('XML Introspector Example Usage', () => {
   it('should demonstrate basic functionality', async () => {

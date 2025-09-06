@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { XMLIntrospector } from "../src/XMLIntrospector";
+import { XMLIntrospector } from "../../src/XMLIntrospector";
 import { join } from "path";
 import {
   existsSync,

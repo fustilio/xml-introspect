@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { XMLFakerGenerator, XMLFakerOptions } from '../src/XMLFakerGenerator';
+import { XMLFakerGenerator, XMLFakerOptions } from '../../src/XMLFakerGenerator';
 import { faker } from '@faker-js/faker';
 
 describe('XMLFakerGenerator', () => {

@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { writeFileSync, unlinkSync, existsSync, mkdirSync, rmdirSync } from 'fs';
 import { join } from 'path';
-import { XMLIntrospector } from '../src/XMLIntrospector';
-import { SamplingStrategy } from '../src/types';
+import { XMLIntrospector } from '../../src/XMLIntrospector';
+import { SamplingStrategy } from '../../src/types';
 
 describe('XMLIntrospector', () => {
   let introspector: XMLIntrospector;

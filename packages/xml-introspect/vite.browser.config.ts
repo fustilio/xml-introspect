@@ -11,7 +11,7 @@ export default defineConfig({
       fileName: 'browser'
     },
     rollupOptions: {
-      external: ['fs', 'path', 'process', 'stream', 'util', 'crypto'],
+      external: ['fs', 'path', 'process', 'stream', 'util', 'crypto', 'sax'],
       output: {
         entryFileNames: 'browser.js'
       }
