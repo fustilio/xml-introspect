@@ -3,12 +3,20 @@ import { execa } from 'execa';
 
 describe('CLI Help Command', () => {
   it('should display help information', async () => {
-    const { stdout } = await execa('node', ['packages/xml-introspect/src/cli.ts', '--help']);
+    const { stdout } = await execa('node', ['dist/cli.js', '--help']);
     expect(stdout).toContain('Usage'); // Adjust based on your CLI's help output
   });
 
   it('should handle invalid arguments gracefully', async () => {
-    const { stderr } = await execa('node', ['packages/xml-introspect/src/cli.ts', '--invalid']);
-    expect(stderr).toContain('Unknown option'); // Adjust based on your CLI's error output
+    try {
+      const { stderr, stdout } = await execa('node', ['dist/cli.js', '--invalid']);
+      // The CLI shows "No command specified" error in stderr and help in stdout
+      expect(stderr).toContain('No command specified');
+      expect(stdout).toContain('XML Introspector CLI Tool');
+    } catch (error) {
+      // If execa throws an error, check that it contains the expected content
+      expect(error.stderr).toContain('No command specified');
+      expect(error.stdout).toContain('XML Introspector CLI Tool');
+    }
   });
 });

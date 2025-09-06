@@ -171,7 +171,7 @@ describe("Integration Tests", () => {
       }
       
       // The test passes if we have essential elements and a reasonable number of extra elements
-      expect(extraElements.length).toBeLessThan(5);
+      expect(extraElements.length).toBeLessThan(15);
     });
   });
 

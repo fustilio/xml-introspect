@@ -4,7 +4,8 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "publish-packages": "pnpm publish --filter ./packages/* --access public"
+    "publish-packages": "pnpm publish --filter ./packages/* --access public",
+    "test": "pnpm --filter ./packages/* test"
   },
   "lint-staged": {
     "*": "prettier --fix"

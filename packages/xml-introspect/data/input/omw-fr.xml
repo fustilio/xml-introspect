@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE LexicalResource SYSTEM "http://globalwordnet.github.io/schemas/WN-LMF-1.3.dtd">
+<LexicalResource xmlns:dc="https://globalwordnet.github.io/schemas/dc/">
+  <GlobalInformation>
+    <label>Open Multilingual WordNet - French</label>
+    <dc:title>Open Multilingual WordNet - French</dc:title>
+    <dc:description>French WordNet from the Open Multilingual WordNet project</dc:description>
+    <dc:creator>Open Multilingual WordNet</dc:creator>
+    <dc:contributor>CNRS</dc:contributor>
+    <dc:date>2023</dc:date>
+    <dc:format>WN-LMF 1.3</dc:format>
+    <dc:language>fr</dc:language>
+    <dc:identifier>omw-fr</dc:identifier>
+    <dc:version>2023</dc:version>
+    <dc:license>https://creativecommons.org/licenses/by/4.0/</dc:license>
+  </GlobalInformation>
+  
+  <Lexicon id="omw-fr" label="Open Multilingual WordNet - French" language="fr" email="wordnet@cnrs.fr" license="https://creativecommons.org/licenses/by/4.0/" version="2023" url="https://github.com/globalwordnet/omw">
+    <feat att="lexicalized" val="true"/>
+    <feat att="dc:subject" val="WordNet"/>
+    
+    <LexicalEntry id="omw-fr-chat-n">
+      <feat att="dc:subject" val="noun.animal"/>
+      <Lemma writtenForm="chat" partOfSpeech="n"/>
+      <Sense id="omw-fr-chat-n-1" synset="omw-fr-00001740-n">
+        <feat att="dc:subject" val="noun.animal"/>
+        <feat att="lexicalized" val="true"/>
+      </Sense>
+    </LexicalEntry>
+    
+    <LexicalEntry id="omw-fr-chien-n">
+      <feat att="dc:subject" val="noun.animal"/>
+      <Lemma writtenForm="chien" partOfSpeech="n"/>
+      <Sense id="omw-fr-chien-n-1" synset="omw-fr-00001741-n">
+        <feat att="dc:subject" val="noun.animal"/>
+        <feat att="lexicalized" val="true"/>
+      </Sense>
+    </LexicalEntry>
+    
+    <LexicalEntry id="omw-fr-bon-a">
+      <feat att="dc:subject" val="adj.all"/>
+      <Lemma writtenForm="bon" partOfSpeech="a"/>
+      <Sense id="omw-fr-bon-a-1" synset="omw-fr-00001740-a">
+        <feat att="dc:subject" val="adj.all"/>
+        <feat att="lexicalized" val="true"/>
+      </Sense>
+    </LexicalEntry>
+    
+    <LexicalEntry id="omw-fr-manger-v">
+      <feat att="dc:subject" val="verb.body"/>
+      <Lemma writtenForm="manger" partOfSpeech="v"/>
+      <Sense id="omw-fr-manger-v-1" synset="omw-fr-00001740-v">
+        <feat att="dc:subject" val="verb.body"/>
+        <feat att="lexicalized" val="true"/>
+      </Sense>
+    </LexicalEntry>
+    
+    <Synset id="omw-fr-00001740-n" partOfSpeech="n">
+      <feat att="dc:subject" val="noun.animal"/>
+      <feat att="lexicalized" val="true"/>
+      <Definition>un petit mammifère domestique carnivore</Definition>
+      <SynsetRelation relType="hyponym" target="omw-fr-00001741-n"/>
+    </Synset>
+    
+    <Synset id="omw-fr-00001741-n" partOfSpeech="n">
+      <feat att="dc:subject" val="noun.animal"/>
+      <feat att="lexicalized" val="true"/>
+      <Definition>un mammifère domestique carnivore de la famille des canidés</Definition>
+    </Synset>
+    
+    <Synset id="omw-fr-00001740-a" partOfSpeech="a">
+      <feat att="dc:subject" val="adj.all"/>
+      <feat att="lexicalized" val="true"/>
+      <Definition>qui a les qualités requises pour quelque chose</Definition>
+    </Synset>
+    
+    <Synset id="omw-fr-00001740-v" partOfSpeech="v">
+      <feat att="dc:subject" val="verb.body"/>
+      <feat att="lexicalized" val="true"/>
+      <Definition>ingérer de la nourriture</Definition>
+    </Synset>
+  </Lexicon>
+</LexicalResource>

@@ -8,7 +8,7 @@ describe('Debug XSD Parser', () => {
     const parser = new XSDParser();
     
     // Read the official schema
-    const officialXSDPath = join(process.cwd(), '..', '..', 'wn-ts-core', 'schemas', 'WN-LMF-1.4.xsd');
+    const officialXSDPath = join(process.cwd(), 'data', 'input', 'WN-LMF-1.4.xsd');
     const officialXSDContent = readFileSync(officialXSDPath, 'utf8');
     
     console.log('📄 Official WN-LMF-1.4.xsd content (first 500 chars):');

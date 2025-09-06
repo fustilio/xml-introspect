@@ -1,5 +1,5 @@
 {
-  "name": "@fustilio/xml-introspect",
+  "name": "xml-introspect",
   "version": "0.1.0",
   "license": "MIT",
   "author": "fustilio",
@@ -28,6 +28,7 @@
     }
   },
   "dependencies": {
+    "@xml-introspect/data-loader": "workspace:*",
     "@faker-js/faker": "^9.9.0",
     "deep-equal": "^2.2.3",
     "sax": "^1.4.1",

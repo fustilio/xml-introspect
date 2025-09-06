@@ -1,5 +1,5 @@
 packages:
-  - packages/xml-introspect
+  - packages/*
 
 catalog:
   '@types/node': ^20.10.0

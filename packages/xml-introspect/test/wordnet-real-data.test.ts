@@ -50,7 +50,7 @@ describe('WordNet Real Data: Big XML → XSD → Small XML Workflow', () => {
 
   it('should process mini-lmf-1.4.xml through the complete workflow', async () => {
     // Step 1: Copy the actual WordNet LMF XML file
-    const sourceXMLPath = join(process.cwd(), '..', '..', 'wn-test-data', 'data', 'mini-lmf-1.4.xml');
+    const sourceXMLPath = join(process.cwd(), 'data', 'input', 'mini-lmf-1.4.xml');
     const xmlFile = copyTestFile(sourceXMLPath, 'mini-lmf-1.4.xml');
     
     console.log('📁 Copied mini-lmf-1.4.xml from test data');
@@ -154,13 +154,13 @@ describe('WordNet Real Data: Big XML → XSD → Small XML Workflow', () => {
 
   it('should compare generated XSD with official WN-LMF-1.4.xsd', async () => {
     // Copy the official WN-LMF-1.4.xsd schema
-    const officialXSDPath = join(process.cwd(), '..', '..', 'wn-ts-core', 'schemas', 'WN-LMF-1.4.xsd');
+    const officialXSDPath = join(process.cwd(), 'data', 'input', 'WN-LMF-1.4.xsd');
     const officialXSDFile = copyTestFile(officialXSDPath, 'official-wn-lmf-1.4.xsd');
     
     console.log('📁 Copied official WN-LMF-1.4.xsd schema');
     
     // Copy a WordNet XML file
-    const sourceXMLPath = join(process.cwd(), '..', '..', 'wn-test-data', 'data', 'mini-lmf-1.4.xml');
+    const sourceXMLPath = join(process.cwd(), 'data', 'input', 'mini-lmf-1.4.xml');
     const xmlFile = copyTestFile(sourceXMLPath, 'mini-lmf-1.4.xml');
     
     // Generate XSD from the XML

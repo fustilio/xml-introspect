@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE LexicalResource SYSTEM "http://globalwordnet.github.io/schemas/WN-LMF-1.3.dtd">
+<LexicalResource xmlns:dc="https://globalwordnet.github.io/schemas/dc/">
+  <GlobalInformation>
+    <label>Open English WordNet</label>
+    <dc:title>Open English WordNet</dc:title>
+    <dc:description>Open English WordNet is a large lexical database of English</dc:description>
+    <dc:creator>Open English WordNet</dc:creator>
+    <dc:contributor>Princeton University</dc:contributor>
+    <dc:date>2023</dc:date>
+    <dc:format>WN-LMF 1.3</dc:format>
+    <dc:language>en</dc:language>
+    <dc:identifier>oewn</dc:identifier>
+    <dc:version>2023</dc:version>
+    <dc:license>https://creativecommons.org/licenses/by/4.0/</dc:license>
+  </GlobalInformation>
+  
+  <Lexicon id="oewn" label="Open English WordNet" language="en" email="wordnet@princeton.edu" license="https://creativecommons.org/licenses/by/4.0/" version="2023" url="https://github.com/globalwordnet/english-wordnet">
+    <feat att="lexicalized" val="true"/>
+    <feat att="dc:subject" val="WordNet"/>
+    
+    <LexicalEntry id="oewn-aardvark-n">
+      <feat att="dc:subject" val="noun.animal"/>
+      <Lemma writtenForm="aardvark" partOfSpeech="n"/>
+      <Sense id="oewn-aardvark-n-1" synset="oewn-00001740-n">
+        <feat att="dc:subject" val="noun.animal"/>
+        <feat att="lexicalized" val="true"/>
+      </Sense>
+    </LexicalEntry>
+    
+    <LexicalEntry id="oewn-aardwolf-n">
+      <feat att="dc:subject" val="noun.animal"/>
+      <Lemma writtenForm="aardwolf" partOfSpeech="n"/>
+      <Sense id="oewn-aardwolf-n-1" synset="oewn-00001740-n">
+        <feat att="dc:subject" val="noun.animal"/>
+        <feat att="lexicalized" val="true"/>
+      </Sense>
+    </LexicalEntry>
+    
+    <LexicalEntry id="oewn-able-a">
+      <feat att="dc:subject" val="adj.all"/>
+      <Lemma writtenForm="able" partOfSpeech="a"/>
+      <Sense id="oewn-able-a-1" synset="oewn-00001740-a">
+        <feat att="dc:subject" val="adj.all"/>
+        <feat att="lexicalized" val="true"/>
+      </Sense>
+    </LexicalEntry>
+    
+    <LexicalEntry id="oewn-breathe-v">
+      <feat att="dc:subject" val="verb.body"/>
+      <Lemma writtenForm="breathe" partOfSpeech="v"/>
+      <Sense id="oewn-breathe-v-1" synset="oewn-00001740-v">
+        <feat att="dc:subject" val="verb.body"/>
+        <feat att="lexicalized" val="true"/>
+      </Sense>
+    </LexicalEntry>
+    
+    <Synset id="oewn-00001740-n" partOfSpeech="n">
+      <feat att="dc:subject" val="noun.animal"/>
+      <feat att="lexicalized" val="true"/>
+      <Definition>a burrowing mammal with a long snout and large ears</Definition>
+      <SynsetRelation relType="hyponym" target="oewn-00001741-n"/>
+    </Synset>
+    
+    <Synset id="oewn-00001740-a" partOfSpeech="a">
+      <feat att="dc:subject" val="adj.all"/>
+      <feat att="lexicalized" val="true"/>
+      <Definition>having the necessary means or skill or know-how or authority to do something</Definition>
+    </Synset>
+    
+    <Synset id="oewn-00001740-v" partOfSpeech="v">
+      <feat att="dc:subject" val="verb.body"/>
+      <feat att="lexicalized" val="true"/>
+      <Definition>draw air into, and expel out of, the lungs</Definition>
+    </Synset>
+  </Lexicon>
+</LexicalResource>
