@@ -66,7 +66,7 @@ graph TD
 The central class that coordinates all format handlers in a processing pipeline.
 
 ```typescript
-import { FormatProcessor } from '@xml-introspect/data-loader';
+import { FormatProcessor } from 'xml-introspect/data-loader';
 
 const processor = new FormatProcessor();
 
@@ -90,7 +90,7 @@ if (result.success) {
 Intelligently detects file formats from decompressed content with confidence levels.
 
 ```typescript
-import { ContentTypeDetector } from '@xml-introspect/data-loader';
+import { ContentTypeDetector } from 'xml-introspect/data-loader';
 
 const detector = new ContentTypeDetector();
 const analysis = detector.detectContentType(xmlText, 'oewn:2024');
@@ -105,7 +105,7 @@ console.log('Indicators:', analysis.indicators);     // Detailed detection info
 Handles gzip decompression with detailed logging and timeout protection.
 
 ```typescript
-import { GzipHandler } from '@xml-introspect/data-loader';
+import { GzipHandler } from 'xml-introspect/data-loader';
 
 const gzipHandler = new GzipHandler();
 
@@ -126,7 +126,7 @@ if (gzipHandler.isGzipCompressed(data)) {
 Handles XZ decompression using the `xz-decompress` library.
 
 ```typescript
-import { XzHandler } from '@xml-introspect/data-loader';
+import { XzHandler } from 'xml-introspect/data-loader';
 
 const xzHandler = new XzHandler();
 
@@ -145,7 +145,7 @@ if (xzHandler.isXzCompressed(data)) {
 Extracts tar archives to find LMF XML files with fallback methods.
 
 ```typescript
-import { TarHandler } from '@xml-introspect/data-loader';
+import { TarHandler } from 'xml-introspect/data-loader';
 
 const tarHandler = new TarHandler();
 
@@ -173,7 +173,7 @@ The system is designed to handle real-world data from various sources:
 ### URL Processing
 
 ```typescript
-import { FormatProcessor } from '@xml-introspect/data-loader';
+import { FormatProcessor } from 'xml-introspect/data-loader';
 
 const processor = new FormatProcessor();
 

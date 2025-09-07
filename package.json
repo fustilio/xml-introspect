@@ -1,5 +1,5 @@
 {
-  "name": "@fustilio/xml-introspect-root",
+  "name": "@xml-introspect/root",
   "version": "0.1.0",
   "private": true,
   "description": "A powerful CLI tool and library for analyzing large XML files and generating representative samples with identical structure",
