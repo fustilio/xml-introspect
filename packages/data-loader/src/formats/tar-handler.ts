@@ -6,6 +6,7 @@ export interface TarExtractionResult {
   error?: string;
   extractedFiles: string[];
   lmfFile?: string;
+  xmlFiles: ExtractedFile[];
   processingTime: number;
 }
 
@@ -40,6 +41,39 @@ export class TarHandler {
     const startTime = Date.now();
 
     return new Promise((resolve, reject) => {
+      // Set a timeout to prevent hanging on large/complex tar files
+      const timeout = setTimeout(() => {
+        if (extractedFiles.length > 0 && lmfFile) {
+          console.log(`Tar extraction timeout but found ${extractedFiles.length} files, using ${lmfFile}`);
+          const xmlContent = new TextDecoder().decode(
+            extractedFiles.find(f => f.name === lmfFile)!.content
+          );
+          
+          const xmlFiles = extractedFiles.filter(f => f.name.endsWith('.xml'));
+          console.log(`Found ${xmlFiles.length} XML files in archive:`);
+          xmlFiles.forEach(f => {
+            const sizeMB = (f.size / (1024 * 1024)).toFixed(1);
+            console.log(`  - ${f.name} (${sizeMB} MB)`);
+          });
+          
+          resolve({
+            success: true,
+            xmlContent,
+            extractedFiles: extractedFiles.map(f => f.name),
+            lmfFile,
+            xmlFiles,
+            processingTime: Date.now() - startTime
+          });
+        } else {
+          resolve({
+            success: false,
+            error: "Tar extraction timeout",
+            extractedFiles: extractedFiles.map(f => f.name),
+            xmlFiles: [],
+            processingTime: Date.now() - startTime
+          });
+        }
+      }, 30000); // 30 second timeout
       const extract = tar.extract();
       const extractedFiles: ExtractedFile[] = [];
       let lmfFile: string | null = null;
@@ -70,7 +104,7 @@ export class TarHandler {
           extractedFiles.push(extractedFile);
 
 
-          // Check if this is an LMF XML file - be more flexible with naming
+          // Check if this is an LMF XML file - collect all XML files for multi-language support
           if (header.name.endsWith(".xml")) {
             const fileName = header.name.toLowerCase();
             if (
@@ -82,7 +116,14 @@ export class TarHandler {
               fileName.includes("thai") ||
               fileName.includes("french")
             ) {
-              lmfFile = header.name;
+              // For OMW packages, prioritize English WordNet as the primary file
+              if (fileName.includes("omw-en") || fileName.includes("omw-en.xml")) {
+                lmfFile = header.name;
+                console.log(`Found English WordNet file: ${header.name}`);
+              } else if (!lmfFile) {
+                // Use the first XML file we find if we haven't found English yet
+                lmfFile = header.name;
+              }
             }
           }
 
@@ -91,6 +132,7 @@ export class TarHandler {
       });
 
       extract.on("finish", () => {
+        clearTimeout(timeout);
 
         if (lmfFile) {
           const xmlContent = new TextDecoder().decode(
@@ -100,11 +142,20 @@ export class TarHandler {
           const endTime = Date.now();
           const processingTime = endTime - startTime;
 
+          // Log information about all XML files found
+          const xmlFiles = extractedFiles.filter(f => f.name.endsWith('.xml'));
+          console.log(`Found ${xmlFiles.length} XML files in archive:`);
+          xmlFiles.forEach(f => {
+            const sizeMB = (f.size / (1024 * 1024)).toFixed(1);
+            console.log(`  - ${f.name} (${sizeMB} MB)`);
+          });
+
           resolve({
             success: true,
             xmlContent,
             extractedFiles: extractedFiles.map(f => f.name),
             lmfFile,
+            xmlFiles,
             processingTime
           });
         } else {
@@ -156,15 +207,41 @@ export class TarHandler {
       });
 
       extract.on("error", (err: any) => {
+        clearTimeout(timeout);
         const endTime = Date.now();
         const processingTime = endTime - startTime;
 
-        resolve({
-          success: false,
-          error: err instanceof Error ? err.message : String(err),
-          extractedFiles: extractedFiles.map(f => f.name),
-          processingTime
-        });
+        // If we have successfully extracted some files, try to use them
+        if (extractedFiles.length > 0 && lmfFile) {
+          console.log(`Tar extraction hit error but found ${extractedFiles.length} files, using ${lmfFile}`);
+          const xmlContent = new TextDecoder().decode(
+            extractedFiles.find(f => f.name === lmfFile)!.content
+          );
+          
+          const xmlFiles = extractedFiles.filter(f => f.name.endsWith('.xml'));
+          console.log(`Found ${xmlFiles.length} XML files in archive:`);
+          xmlFiles.forEach(f => {
+            const sizeMB = (f.size / (1024 * 1024)).toFixed(1);
+            console.log(`  - ${f.name} (${sizeMB} MB)`);
+          });
+          
+          resolve({
+            success: true,
+            xmlContent,
+            extractedFiles: extractedFiles.map(f => f.name),
+            lmfFile,
+            xmlFiles,
+            processingTime
+          });
+        } else {
+          resolve({
+            success: false,
+            error: err instanceof Error ? err.message : String(err),
+            extractedFiles: extractedFiles.map(f => f.name),
+            xmlFiles: [],
+            processingTime
+          });
+        }
       });
 
       // Convert ArrayBuffer to ReadableStream for tar-stream

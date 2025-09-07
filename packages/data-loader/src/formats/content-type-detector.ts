@@ -44,7 +44,11 @@ export class ContentTypeDetector {
       trimmedContent.startsWith("PaxHeader") ||
       trimmedContent.startsWith("GlobalHeader") ||
       // Check for tar file entries (e.g., "omw-fr/0000755...")
-      /^[a-zA-Z0-9_-]+\/0000[0-7]{3}[0-9]{6}[0-9]{6}[0-9]{6}[0-9]{6}[0-9]{6}/m.test(trimmedContent);
+      /^[a-zA-Z0-9_-]+\/0000[0-7]{3}[0-9]{6}[0-9]{6}[0-9]{6}[0-9]{6}[0-9]{6}/m.test(trimmedContent) ||
+      // Check for ustar anywhere in the first few lines (tar headers can be embedded)
+      trimmedContent.includes("ustar") ||
+      // Check for tar file patterns anywhere in content
+      /[a-zA-Z0-9_-]+\/0000[0-7]{3}[0-9]{6}[0-9]{6}[0-9]{6}[0-9]{6}[0-9]{6}/.test(trimmedContent);
 
     // Additional check: tar files typically don't contain XML-like content
     const hasXMLContent =
@@ -79,12 +83,13 @@ export class ContentTypeDetector {
     let confidence: "high" | "medium" | "low";
 
     // If we detect tar indicators, prioritize tar detection over other types
+    // This includes cases where tar header is mixed with XML content
     if (hasTarHeader || (isOMWPackage && hasOMWIndicators && hasBinaryTarContent)) {
       type = "tar";
       confidence = hasTarHeader ? "high" : "medium";
     }
-    // Check for LMF XML content
-    else if (hasXMLContent) {
+    // Check for LMF XML content (only if no tar indicators)
+    else if (hasXMLContent && !hasTarHeader) {
       type = "lmf";
       confidence = "high";
     }

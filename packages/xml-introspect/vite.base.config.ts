@@ -1,7 +1,7 @@
 import { defineConfig, type UserConfig, loadEnv } from 'vite';
 
 // Common external dependencies
-export const NODE_EXTERNALS = ['fs', 'path', 'process', 'stream', 'util', 'crypto', 'sax', 'events', 'string_decoder', 'node:fs', 'node:path', 'node:process', 'node:stream', 'node:util', 'node:crypto', 'node:events', 'node:string_decoder'];
+export const NODE_EXTERNALS = ['fs', 'path', 'process', 'stream', 'util', 'crypto', 'sax', 'events', 'string_decoder', 'inquirer', 'node:fs', 'node:path', 'node:process', 'node:stream', 'node:util', 'node:crypto', 'node:events', 'node:string_decoder', 'node:readline', 'node:child_process', 'node:tty', 'node:os', 'node:async_hooks'];
 
 // Build targets
 export const BUILD_TARGETS = {

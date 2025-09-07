@@ -13,6 +13,7 @@ export interface FormatProcessingResult {
   totalProcessingTime: number;
   originalSize: number;
   finalSize: number;
+  extractedXmlFiles?: Array<{name: string, size: number}>;
 }
 
 export interface FormatProcessingOptions {
@@ -47,7 +48,7 @@ export class FormatProcessor {
     const startTime = Date.now();
     const originalSize = data.byteLength;
     const processingSteps: string[] = [];
-    
+    let extractedXmlFiles: Array<{name: string, size: number}> | undefined;
 
     try {
       const view = new Uint8Array(data);
@@ -144,6 +145,12 @@ export class FormatProcessor {
               contentType = "lmf";
               confidence = "high";
               processingSteps.push(`Tar extraction completed (${tarResult.extractedFiles.length} files)`);
+              
+              // Store information about all extracted XML files
+              extractedXmlFiles = tarResult.xmlFiles.map(f => ({
+                name: f.name,
+                size: f.size
+              }));
             } else if ((data as any).__xzBinaryData) {
               // Use the binary data stored from XZ decompression
               const binaryData = (data as any).__xzBinaryData as Uint8Array;
@@ -159,6 +166,12 @@ export class FormatProcessor {
               contentType = "lmf";
               confidence = "high";
               processingSteps.push(`Tar extraction from XZ binary data completed (${tarResult.extractedFiles.length} files)`);
+              
+              // Store information about all extracted XML files
+              extractedXmlFiles = tarResult.xmlFiles.map(f => ({
+                name: f.name,
+                size: f.size
+              }));
             } else if ((data as any).__gzipBinaryData) {
               // Use the binary data stored from gzip decompression
               const binaryData = (data as any).__gzipBinaryData as Uint8Array;
@@ -226,7 +239,8 @@ export class FormatProcessor {
         processingSteps,
         totalProcessingTime,
         originalSize,
-        finalSize: xmlText.length
+        finalSize: xmlText.length,
+        extractedXmlFiles
       };
 
     } catch (error) {

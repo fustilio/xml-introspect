@@ -40,9 +40,11 @@
   },
   "dependencies": {
     "@faker-js/faker": "^9.9.0",
+    "@types/inquirer": "^9.0.9",
     "@xml-introspect/data-loader": "workspace:*",
     "commander": "^14.0.0",
     "deep-equal": "^2.2.3",
+    "inquirer": "^12.9.4",
     "sax": "^1.4.1",
     "unist-util-filter": "^5.0.1",
     "unist-util-find": "^3.0.0",
