@@ -2,6 +2,7 @@
 
 import { XMLIntrospector } from './XMLIntrospector.js';
 import { XMLFakerGenerator, XMLFakerOptions } from './XMLFakerGenerator.js';
+import { FormatProcessor } from '@xml-introspect/data-loader';
 import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
@@ -45,6 +46,7 @@ Commands:
   expand <input> [options]     Expand small XML to larger XML
   realistic <input> [options]  Generate realistic XML using Faker
   validate <xml> <xsd>         Validate XML against XSD schema
+  preview <url> [options]      Preview and summarize XML file from URL
 
 Options:
   -i, --input <file>           Input XML/XSD file path
@@ -66,6 +68,7 @@ Examples:
   xml-introspect generate schema.xsd -o output.xml -r -s 12345
   xml-introspect realistic input.xml -o realistic.xml -s 42
   xml-introspect expand small.xml -o large.xml -t 5000
+  xml-introspect preview https://example.com/data.xml.gz
 `);
 }
 
@@ -83,6 +86,7 @@ function parseArgs(args: string[]): CLIOptions {
       case 'expand':
       case 'realistic':
       case 'validate':
+      case 'preview':
         options.command = arg;
         // Handle positional arguments: first is input, second is output
         if (i + 1 < args.length && !args[i + 1].startsWith('-')) {
@@ -347,6 +351,104 @@ async function runCommand(options: CLIOptions) {
           });
         }
         console.log('✅ Command completed successfully');
+        process.exit(0);
+        break;
+        
+      case 'preview':
+        if (!options.input) {
+          throw new Error('URL is required for preview command');
+        }
+        
+        logVerbose('🌐 Downloading and analyzing file from URL...');
+        logVerbose(`📥 URL: ${options.input}`);
+        
+        try {
+          let arrayBuffer: ArrayBuffer;
+          let isLocalFile = false;
+          
+          // Check if it's a local file
+          if (options.input.startsWith('file://') || (!options.input.startsWith('http://') && !options.input.startsWith('https://'))) {
+            // Handle local file
+            const filePath = options.input.startsWith('file://') 
+              ? options.input.replace('file://', '') 
+              : options.input;
+            const fileBuffer = readFileSync(filePath);
+            arrayBuffer = fileBuffer.buffer.slice(fileBuffer.byteOffset, fileBuffer.byteOffset + fileBuffer.byteLength);
+            isLocalFile = true;
+            logVerbose(`📁 Reading local file: ${filePath}`);
+          } else {
+            // Handle remote URL
+            const response = await fetch(options.input);
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            arrayBuffer = await response.arrayBuffer();
+            logVerbose(`📊 Downloaded ${arrayBuffer.byteLength} bytes`);
+          }
+          
+          // Use data-loader to process the file
+          const dataLoader = new FormatProcessor();
+          
+          // Determine project ID from URL
+          let projectId = 'unknown';
+          if (options.input.includes('omw')) {
+            projectId = 'omw:preview';
+          } else if (options.input.includes('oewn') || options.input.includes('english-wordnet')) {
+            projectId = 'oewn:preview';
+          } else if (options.input.includes('cili')) {
+            projectId = 'cili:preview';
+          }
+          
+          logVerbose('🔄 Processing file with data-loader...');
+          const result = await dataLoader.processData(arrayBuffer, {
+            projectId,
+            enableTarExtraction: true
+          });
+          
+          if (!result.success) {
+            throw new Error(`Failed to process file: ${result.error}`);
+          }
+          
+          const content = result.xmlContent!;
+          const contentType = result.contentType;
+          
+          const lines = content.split('\n');
+          const totalLines = lines.length;
+          
+          console.log('\n📋 File Summary:');
+          console.log('═'.repeat(50));
+          console.log(`📁 ${isLocalFile ? 'File' : 'URL'}: ${options.input}`);
+          console.log(`📊 Original size: ${result.originalSize.toLocaleString()} bytes`);
+          console.log(`📊 Final size: ${result.finalSize.toLocaleString()} characters`);
+          console.log(`📄 Total lines: ${totalLines.toLocaleString()}`);
+          console.log(`🔍 Content type: ${contentType} (confidence: ${result.confidence})`);
+          console.log(`⏱️  Processing time: ${result.totalProcessingTime}ms`);
+          console.log(`🔄 Processing steps: ${result.processingSteps.join(' → ')}`);
+          
+          if (totalLines <= 400) {
+            // If file is small, show everything
+            console.log('\n📄 Full Content:');
+            console.log('─'.repeat(50));
+            console.log(content);
+          } else {
+            // Show first and last 200 lines
+            const firstLines = lines.slice(0, 200).join('\n');
+            const lastLines = lines.slice(-200).join('\n');
+            
+            console.log('\n📄 First 200 lines:');
+            console.log('─'.repeat(50));
+            console.log(firstLines);
+            console.log('\n... (content truncated) ...\n');
+            console.log('📄 Last 200 lines:');
+            console.log('─'.repeat(50));
+            console.log(lastLines);
+          }
+          
+          console.log('\n✅ Preview completed successfully');
+        } catch (error) {
+          console.error(`❌ Preview failed: ${error.message}`);
+          process.exit(1);
+        }
         process.exit(0);
         break;
         

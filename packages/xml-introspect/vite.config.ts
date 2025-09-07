@@ -1,9 +1,15 @@
-import { defineConfig } from 'vite';
+import { createViteConfig, BUILD_TARGETS, NODE_EXTERNALS } from './vite.base.config';
 
-// Default config - builds Node.js library and CLI
-export default defineConfig({
+// Node.js library and CLI build
+export default createViteConfig({
+  define: {
+    global: 'globalThis',
+  },
+  ssr: {
+    noExternal: ['@xml-introspect/data-loader']
+  },
   build: {
-    target: 'node18',
+    target: BUILD_TARGETS.node,
     lib: {
       entry: {
         index: 'src/index.ts',
@@ -13,8 +19,10 @@ export default defineConfig({
       fileName: (format, entryName) => `${entryName}.js`
     },
     rollupOptions: {
-      external: ['fs', 'path', 'process', 'stream', 'util', 'crypto', 'sax'],
+      external: NODE_EXTERNALS,
       output: {
+        format: 'es',
+        preserveModules: false,
         entryFileNames: (chunkInfo) => {
           if (chunkInfo.name === 'cli') {
             return 'cli.js';
@@ -23,8 +31,5 @@ export default defineConfig({
         }
       }
     }
-  },
-  optimizeDeps: {
-    exclude: ["sax", "xmllint-wasm"],
-  },
+  }
 });

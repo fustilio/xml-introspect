@@ -66,14 +66,21 @@ describe('CLI XML URL Tests', () => {
   }, 30000); // 30 second timeout for download
 
   it('should handle multiple URL formats', async () => {
-    // Test different URL formats from the config
-    const testUrls = config.xmlUrls.slice(0, 3); // Test first 3 URLs
+    // Test just 2 reliable URLs to avoid timeout issues
+    const testUrls = config.xmlUrls.slice(0, 2); // Test first 2 URLs only
+    let successCount = 0;
     
     for (const url of testUrls) {
       try {
         console.log(`🌐 Testing URL: ${url}`);
         
-        const response = await fetch(url);
+        // Add timeout for individual fetch requests
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout per URL
+        
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        
         if (!response.ok) {
           console.warn(`⚠️ Skipping ${url}: HTTP ${response.status}`);
           continue;
@@ -100,17 +107,22 @@ describe('CLI XML URL Tests', () => {
         if (result.success) {
           console.log(`✅ Successfully processed ${url} (${result.contentType})`);
           expect(result.xmlContent).toBeDefined();
+          successCount++;
         } else {
           console.warn(`⚠️ Failed to process ${url}: ${result.error}`);
         }
         
       } catch (error) {
-        console.warn(`⚠️ Error processing ${url}: ${error.message}`);
+        if (error.name === 'AbortError') {
+          console.warn(`⚠️ Timeout processing ${url}`);
+        } else {
+          console.warn(`⚠️ Error processing ${url}: ${error.message}`);
+        }
         // Continue with other URLs
       }
     }
     
     // At least one URL should work
-    expect(true).toBe(true);
-  }, 60000); // 60 second timeout for multiple downloads
+    expect(successCount).toBeGreaterThan(0);
+  }, 45000); // 45 second timeout for multiple downloads
 });

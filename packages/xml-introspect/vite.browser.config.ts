@@ -1,8 +1,9 @@
-import { defineConfig } from 'vite';
+import { createViteConfig, BUILD_TARGETS, NODE_EXTERNALS } from './vite.base.config';
 
-export default defineConfig({
+// Browser build
+export default createViteConfig({
   build: {
-    target: 'esnext',
+    target: BUILD_TARGETS.browser,
     outDir: 'dist',
     emptyOutDir: false,
     lib: {
@@ -11,13 +12,11 @@ export default defineConfig({
       fileName: 'browser'
     },
     rollupOptions: {
-      external: ['fs', 'path', 'process', 'stream', 'util', 'crypto', 'sax'],
+      external: NODE_EXTERNALS,
       output: {
+        format: 'es',
         entryFileNames: 'browser.js'
       }
     }
-  },
-  optimizeDeps: {
-    exclude: ["sax", "xmllint-wasm"],
-  },
+  }
 });

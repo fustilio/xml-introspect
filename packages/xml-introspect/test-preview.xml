@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LexicalResource xmlns="https://globalwordnet.github.io/schemas/">
+  <GlobalInformation>
+    <label>Test WordNet</label>
+    <title>Test Lexical Resource</title>
+    <description>A test lexical resource for preview functionality</description>
+    <creator>Test User</creator>
+    <date>2024-01-01</date>
+    <language>en</language>
+    <version>1.0</version>
+  </GlobalInformation>
+  <Lexicon id="test-lexicon" label="Test Lexicon" language="en">
+    <LexicalEntry id="entry-1">
+      <Lemma writtenForm="test" partOfSpeech="n"/>
+      <Sense id="sense-1" synset="synset-1">
+        <Definition>This is a test definition</Definition>
+      </Sense>
+    </LexicalEntry>
+    <Synset id="synset-1" partOfSpeech="n">
+      <Definition>Test synset definition</Definition>
+    </Synset>
+  </Lexicon>
+</LexicalResource>
+
