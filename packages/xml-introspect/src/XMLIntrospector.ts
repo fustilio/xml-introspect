@@ -1617,9 +1617,9 @@ export class XMLIntrospector {
             }
             
             // Safety check to prevent excessive memory usage
-            if (totalElements > 1000000) {
+            if (totalElements > 10000000) {
                 clearTimeout(timeout);
-                reject(new Error('XML too large: exceeded 1 million elements'));
+                reject(new Error('XML too large: exceeded 10 million elements'));
                 return;
             }
             

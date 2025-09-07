@@ -12,9 +12,6 @@ catalogs:
     '@vitest/ui':
       specifier: 3.2.4
       version: 3.2.4
-    typescript:
-      specifier: 5.8.3
-      version: 5.8.3
     vite:
       specifier: ^7.0.4
       version: 7.1.4
@@ -57,9 +54,6 @@ importers:
         specifier: 'catalog:'
         version: 4.1.5
     devDependencies:
-      typescript:
-        specifier: 'catalog:'
-        version: 5.8.3
       vitest:
         specifier: 'catalog:'
         version: 3.2.4(@types/node@20.19.13)(@vitest/ui@3.2.4)(jsdom@26.1.0)(yaml@2.8.1)
@@ -72,6 +66,9 @@ importers:
       '@xml-introspect/data-loader':
         specifier: workspace:*
         version: link:../data-loader
+      commander:
+        specifier: ^14.0.0
+        version: 14.0.0
       deep-equal:
         specifier: ^2.2.3
         version: 2.2.3
@@ -696,6 +693,10 @@ packages:
   commander@13.1.0:
     resolution: {integrity: sha512-/rFeCpNJQbhSZjGVwO9RFV3xPqbnERS8MmIQzCtD/zl6gpJuV/bMLuN92oG3F7d8oDEHHRrujSXNUr8fpjntKw==}
     engines: {node: '>=18'}
+
+  commander@14.0.0:
+    resolution: {integrity: sha512-2uM9rYjPvyq39NwLRqaiLtWHyDC1FvryJDa2ATTVims5YAS4PupsEQsDvP14FqhFr0P49CYDugi59xaxJlTXRA==}
+    engines: {node: '>=20'}
 
   cross-env@7.0.3:
     resolution: {integrity: sha512-+/HKd6EgcQCJGh2PSjZuUitQBQynKor4wrFbRg4DtAgS1aWO+gU52xpH7M9ScGgXSYmAVS9bIJ8EzuaGw0oNAw==}
@@ -1484,11 +1485,6 @@ packages:
     resolution: {integrity: sha512-hdF5ZgjTqgAntKkklYw0R03MG2x/bSzTtkxmIRw/sTNV8YXsCJ1tfLAX23lhxhHJlEf3CRCOCGGWw3vI3GaSPw==}
     engines: {node: '>=18'}
 
-  typescript@5.8.3:
-    resolution: {integrity: sha512-p1diW6TqL9L07nNxvRMM7hMMw4c5XOo/1ibL4aAIGmSAt9slTE1Xgw5KWuof2uTOvCg9BY7ZRi+GaF+7sfgPeQ==}
-    engines: {node: '>=14.17'}
-    hasBin: true
-
   typescript@5.9.2:
     resolution: {integrity: sha512-CWBzXQrc/qOkhidw1OzBTQuYRbfyxDXJMVJ1XNwUHGROVmuaeiEm3OslpZ1RV96d7SKKjZKrSJu3+t/xlw3R9A==}
     engines: {node: '>=14.17'}
@@ -2148,6 +2144,8 @@ snapshots:
   colorette@2.0.20: {}
 
   commander@13.1.0: {}
+
+  commander@14.0.0: {}
 
   cross-env@7.0.3:
     dependencies:
@@ -3027,8 +3025,6 @@ snapshots:
   tr46@5.1.1:
     dependencies:
       punycode: 2.3.1
-
-  typescript@5.8.3: {}
 
   typescript@5.9.2: {}
 
