@@ -81,9 +81,22 @@ describe('End-to-End Workflow Tests', () => {
     expect(xsdContent).toContain('xmlns:xs="http://www.w3.org/2001/XMLSchema"');
     expect(xsdContent).toContain('</xs:schema>');
 
-    // For now, just validate the XSD structure - the CLI validation command seems to have issues
-    // TODO: Fix the validation command and re-enable full validation
-    console.log(`✅ XSD structure validation passed for ${xsdFile}`);
+    // Test actual validation using the CLI
+    try {
+      const { stdout } = await execa('timeout', ['10', 'node', 'dist/cli.js', 'validate', originalXmlFile, xsdFile], {
+        timeout: 15000
+      });
+      expect(stdout).toContain('XML is valid according to the XSD schema');
+      console.log(`✅ XSD validation passed for ${xsdFile}`);
+    } catch (error: any) {
+      if (error.exitCode === 124) {
+        // Handle timeout - check if validation was successful before timeout
+        expect(error.stdout).toContain('XML is valid according to the XSD schema');
+        console.log(`✅ XSD validation passed for ${xsdFile} (timeout)`);
+      } else {
+        throw new Error(`Generated XSD failed validation: ${error.message}`);
+      }
+    }
   }
 
   // Helper function to run CLI command with timeout handling

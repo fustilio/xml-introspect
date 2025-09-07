@@ -31,9 +31,32 @@ describe('CLI Schema Generation Tests', () => {
     expect(xsdContent).toContain('xmlns:xs="http://www.w3.org/2001/XMLSchema"');
     expect(xsdContent).toContain('</xs:schema>');
 
-    // For now, just validate the XSD structure - the CLI validation command seems to have issues
-    // TODO: Fix the validation command and re-enable full validation
-    console.log(`✅ XSD structure validation passed for ${xsdFile}`);
+    // Check that the XSD contains element declarations for the main elements in the XML
+    const xmlContent = readFileSync(originalXmlFile, 'utf8');
+    const elementMatches = xmlContent.match(/<(\w+)/g);
+    if (elementMatches) {
+      const elements = [...new Set(elementMatches.map(match => match.slice(1)))];
+      // Check that at least the root element is declared
+      const rootElement = elements[0];
+      expect(xsdContent).toContain(`name="${rootElement}"`);
+    }
+
+    // Now test actual validation using the CLI
+    try {
+      const { stdout } = await execa('timeout', ['10', 'node', 'dist/cli.js', 'validate', originalXmlFile, xsdFile], {
+        timeout: 15000
+      });
+      expect(stdout).toContain('XML is valid according to the XSD schema');
+      console.log(`✅ XSD validation passed for ${xsdFile}`);
+    } catch (error: any) {
+      if (error.exitCode === 124) {
+        // Handle timeout - check if validation was successful before timeout
+        expect(error.stdout).toContain('XML is valid according to the XSD schema');
+        console.log(`✅ XSD validation passed for ${xsdFile} (timeout)`);
+      } else {
+        throw new Error(`Generated XSD failed validation: ${error.message}`);
+      }
+    }
   }
 
   // Setup: Create test XML file

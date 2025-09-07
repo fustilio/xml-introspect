@@ -647,7 +647,9 @@ program
         } else {
           console.log('❌ XML validation failed:');
           validation.errors.forEach(error => {
-            console.log(`  - ${error.message}`);
+            // Handle different error formats from xmllint-wasm
+            const errorMessage = error?.message || error?.toString() || String(error);
+            console.log(`  - ${errorMessage}`);
           });
         }
         console.log('✅ Command completed successfully');

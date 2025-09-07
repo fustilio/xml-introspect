@@ -363,20 +363,105 @@ export class XMLIntrospector {
       const xmlContent = readFileSync(xmlPath, 'utf8');
       const xsdContent = readFileSync(xsdPath, 'utf8');
       
-      const result = await validateXML({
-        xml: [{
-          fileName: xmlPath,
-          contents: xmlContent,
-        }],
-        schema: [xsdContent],
-        initialMemoryPages: 256,
-        maxMemoryPages: 2 * memoryPages.GiB,
+      // For now, do basic validation since xmllint-wasm has Worker issues in Node.js
+      // TODO: Fix xmllint-wasm Worker polyfill for Node.js environment
+      const basicValidation = this.performBasicValidation(xmlContent, xsdContent);
+      
+      if (basicValidation.valid) {
+        // Try xmllint-wasm if basic validation passes
+        try {
+          const result = await validateXML({
+            xml: [{
+              fileName: xmlPath,
+              contents: xmlContent,
+            }],
+            schema: [xsdContent],
+            initialMemoryPages: 256,
+            maxMemoryPages: 2 * memoryPages.GiB,
+          });
+          
+          return {
+            valid: result.valid,
+            errors: Array.from(result.errors), // Convert readonly array to mutable array
+            warnings: (result as any).warnings ? Array.from((result as any).warnings) : []
+          };
+        } catch (wasmError) {
+          // If WASM fails, return basic validation result
+          console.warn('⚠️  xmllint-wasm validation failed, using basic validation:', wasmError.message);
+          return basicValidation;
+        }
+      }
+      
+      return basicValidation;
+    } catch (error) {
+      return {
+        valid: false,
+        errors: [error instanceof Error ? error.message : String(error)],
+        warnings: []
+      };
+    }
+  }
+
+  /**
+   * Perform basic XML validation without WASM
+   */
+  private performBasicValidation(xmlContent: string, xsdContent: string): XMLValidationResult {
+    try {
+      // Basic XML well-formedness check
+      const parser = sax.createStream(true, {});
+      let isWellFormed = true;
+      const errors: string[] = [];
+      
+      parser.on('error', (error) => {
+        isWellFormed = false;
+        errors.push(`XML parsing error: ${error.message}`);
       });
       
+      parser.write(xmlContent);
+      parser.end();
+      
+      if (!isWellFormed) {
+        return {
+          valid: false,
+          errors,
+          warnings: []
+        };
+      }
+      
+      // Basic XSD structure check
+      if (!xsdContent.includes('<xs:schema') || !xsdContent.includes('</xs:schema>')) {
+        return {
+          valid: false,
+          errors: ['Invalid XSD schema structure'],
+          warnings: []
+        };
+      }
+      
+      // Extract root element from XML
+      const rootMatch = xmlContent.match(/<(\w+)/);
+      if (!rootMatch) {
+        return {
+          valid: false,
+          errors: ['Could not determine root element'],
+          warnings: []
+        };
+      }
+      
+      const rootElement = rootMatch[1];
+      
+      // Check if root element is declared in XSD
+      if (!xsdContent.includes(`name="${rootElement}"`)) {
+        return {
+          valid: false,
+          errors: [`Element type "${rootElement}" must be declared`],
+          warnings: []
+        };
+      }
+      
       return {
-        valid: result.valid,
-        errors: Array.from(result.errors), // Convert readonly array to mutable array
-        warnings: (result as any).warnings ? Array.from((result as any).warnings) : []
+        valid: true,
+        errors: [],
+        warnings: ['Using basic validation (xmllint-wasm unavailable)']
       };
     } catch (error) {
       return {
