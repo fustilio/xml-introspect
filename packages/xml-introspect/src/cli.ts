@@ -79,7 +79,14 @@ async function processUrlOrFile(input: string, projectId: string = 'unknown'): P
     });
     
     if (!result.success) {
-      throw new Error(`Failed to process file: ${result.error}`);
+      // Provide more specific error messages for common issues
+      if (result.error?.includes('TSV') || result.error?.includes('tsv')) {
+        throw new Error(`This appears to be a TSV (tab-separated values) file, not XML. The XML Introspector only processes XML files.`);
+      } else if (result.error?.includes('Invalid tar header')) {
+        throw new Error(`Failed to process archive: ${result.error}`);
+      } else {
+        throw new Error(`Failed to process file: ${result.error}`);
+      }
     }
     
     // Check for multi-file discovery and prompt user

@@ -50,19 +50,16 @@ export class ContentTypeDetector {
       // Check for tar file patterns anywhere in content
       /[a-zA-Z0-9_-]+\/0000[0-7]{3}[0-9]{6}[0-9]{6}[0-9]{6}[0-9]{6}[0-9]{6}/.test(trimmedContent);
 
-    // Additional check: tar files typically don't contain XML-like content
+    // Check for XML content
     const hasXMLContent =
       trimmedContent.includes("<?xml") ||
-      trimmedContent.includes("<LexicalResource") ||
-      trimmedContent.includes("<lexicon");
+      trimmedContent.includes("<");
 
-    // Enhanced tar detection for OMW packages
-    const isOMWPackage = projectIdWithVersion.startsWith("omw-");
-    const hasOMWIndicators = 
-      trimmedContent.includes("omw-") ||
-      trimmedContent.includes("wolf") ||
-      trimmedContent.includes("french") ||
-      trimmedContent.includes("thai");
+    // Check for TSV content (tab-separated values)
+    const hasTSVContent = 
+      trimmedContent.includes("\t") && 
+      !trimmedContent.includes("<?xml") &&
+      !trimmedContent.includes("<");
 
     // Check for binary tar content (tar files often contain binary data that looks like garbage when decoded as text)
     const hasBinaryTarContent = 
@@ -80,20 +77,20 @@ export class ContentTypeDetector {
     let confidence: "high" | "medium" | "low";
 
     // If we detect tar indicators, prioritize tar detection over other types
-    // This includes cases where tar header is mixed with XML content
-    if (hasTarHeader || (isOMWPackage && hasOMWIndicators && hasBinaryTarContent)) {
+    // Check for tar archive content
+    if (hasTarHeader || hasBinaryTarContent) {
       type = "tar";
       confidence = hasTarHeader ? "high" : "medium";
+    }
+    // Check for TSV content (tab-separated values)
+    else if (hasTSVContent && !hasTarHeader) {
+      type = "tsv";
+      confidence = "high";
     }
     // Check for XML content (only if no tar indicators)
     else if (hasXMLContent && !hasTarHeader) {
       type = "xml";
       confidence = "high";
-    }
-    // Check for TSV content (only if we're sure it's not a tar archive)
-    else if (hasTSVStructure && !hasTarHeader && !isOMWPackage) {
-      type = "tsv";
-      confidence = "medium";
     }
     // Fallback to XML if we have some XML-like content
     else if (hasXMLContent) {

@@ -20,7 +20,7 @@ A modular, production-ready data processing system for handling various compress
 
 | Format | Handler | Description | Use Cases |
 |--------|---------|-------------|-----------|
-| **Gzip** | `GzipHandler` | GNU zip compression | WordNet LMF files, general XML compression |
+| **Gzip** | `GzipHandler` | GNU zip compression | General data compression, XML files |
 | **XZ** | `XzHandler` | XZ compression with LZMA2 | High compression ratio files |
 | **Tar** | `TarHandler` | Tape archive format | Multi-file archives, package distributions |
 | **XML** | `ContentTypeDetector` | Direct XML content | Uncompressed XML files |
@@ -95,7 +95,7 @@ import { ContentTypeDetector } from 'xml-introspect/data-loader';
 const detector = new ContentTypeDetector();
 const analysis = detector.detectContentType(xmlText, 'oewn:2024');
 
-console.log('Detected type:', analysis.type);        // 'lmf', 'xml', 'tar', 'tsv', 'ili'
+console.log('Detected type:', analysis.type);        // 'xml', 'tar', 'tsv', 'unknown'
 console.log('Confidence:', analysis.confidence);     // 'high', 'medium', 'low'
 console.log('Indicators:', analysis.indicators);     // Detailed detection info
 ```
@@ -142,7 +142,7 @@ if (xzHandler.isXzCompressed(data)) {
 
 ### `TarHandler` - Archive Extraction
 
-Extracts tar archives to find LMF XML files with fallback methods.
+Extracts tar archives to find XML files with fallback methods.
 
 ```typescript
 import { TarHandler } from 'xml-introspect/data-loader';
@@ -165,10 +165,10 @@ if (tarHandler.isTarArchive(content)) {
 
 The system is designed to handle real-world data from various sources:
 
-- **WordNet LMF**: English, French, German, and 30+ other languages
-- **CILI**: Collaborative Interlingual Index
-- **Open Multilingual WordNet (OMW)**: Multi-language lexical resources
-- **Open WordNets (OWN)**: Community-driven wordnets
+- **XML Datasets**: Various XML-based data formats
+- **Tabular Data**: TSV and CSV formats
+- **Multi-file Archives**: Tar and compressed archives
+- **Community Datasets**: Various open data sources
 
 ### URL Processing
 
@@ -196,26 +196,26 @@ if (result.success) {
 ### Format Detection Examples
 
 ```typescript
-// WordNet LMF files
+// XML files
 const oewnResult = await processor.processData(oewnData, {
   projectId: 'oewn:2024',
   enableTarExtraction: true
 });
-// Result: { contentType: 'lmf', confidence: 'high' }
+// Result: { contentType: 'xml', confidence: 'high' }
 
 // French WordNet (tar.xz format)
 const omwFrResult = await processor.processData(omwFrData, {
   projectId: 'omw-fr:1.4',
   enableTarExtraction: true
 });
-// Result: { contentType: 'lmf', confidence: 'high' }
+// Result: { contentType: 'xml', confidence: 'high' }
 
-// CILI data
-const ciliResult = await processor.processData(ciliData, {
-  projectId: 'cili:1.0',
+// TSV data
+const tsvResult = await processor.processData(tsvData, {
+  projectId: 'data:1.0',
   enableTarExtraction: true
 });
-// Result: { contentType: 'ili', confidence: 'high' }
+// Result: { contentType: 'tsv', confidence: 'high' }
 ```
 
 ## 🧪 Testing
@@ -247,7 +247,7 @@ pnpm test src/formats/__tests__/tar-handler.test.ts
 
 Tests use real data from various sources:
 
-- **WordNet LMF files**: English, French, German
+- **XML files**: Various XML-based data formats
 - **Compressed formats**: gzip, xz, tar combinations
 - **Large files**: 100MB+ datasets
 - **Edge cases**: Malformed data, network errors
@@ -267,7 +267,7 @@ interface FormatProcessingOptions {
 ### `ContentType`
 
 ```typescript
-type ContentType = 'lmf' | 'xml' | 'tar' | 'tsv' | 'ili' | 'unknown';
+type ContentType = 'xml' | 'tar' | 'tsv' | 'unknown';
 ```
 
 ### `FormatProcessingResult`
@@ -379,7 +379,7 @@ try {
 
 **Tar Extraction Problems**:
 - Verify tar archive integrity
-- Check for LMF files in archive
+- Check for XML files in archive
 - Review extraction permissions
 
 ### Debug Information

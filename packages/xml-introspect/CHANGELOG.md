@@ -1,5 +1,13 @@
 # xml-introspect
 
+## 0.3.1
+
+### Patch Changes
+
+- remove wordnet specific implementations
+- Updated dependencies
+  - @fustilio/data-loader@0.3.1
+
 ## 0.3.0
 
 ### Minor Changes
