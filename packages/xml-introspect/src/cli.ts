@@ -626,7 +626,7 @@ program
 program
   .command('validate')
   .description('Validate XML against XSD schema')
-  .argument('<xml>', 'XML file path')
+  .argument('<xml>', 'XML file path or URL')
   .argument('<xsd>', 'XSD schema file path')
   .action(async (xml, xsd) => {
     try {
@@ -640,7 +640,17 @@ program
 
       const introspector = new XMLIntrospector();
       
-      const validation = await introspector.validateXML(xml, xsd);
+      // Process URL or file input
+      const projectId = getProjectId(xml, 'validate');
+      const processedXml = await processUrlOrFile(xml, projectId);
+      
+      // Extract the actual file path from the processed result
+      let xmlFilePath = processedXml;
+      if (typeof processedXml === 'object' && processedXml.filePath) {
+        xmlFilePath = processedXml.filePath;
+      }
+      
+      const validation = await introspector.validateXML(xmlFilePath, xsd);
         
         if (validation.valid) {
           console.log('✅ XML is valid according to the XSD schema');
@@ -653,6 +663,11 @@ program
           });
         }
         console.log('✅ Command completed successfully');
+        
+        // Clean up temporary file if it was created
+        if (typeof processedXml === 'object' && processedXml.filePath && processedXml.filePath !== xml) {
+          cleanupTempFile(processedXml.filePath);
+        }
     } catch (error) {
       console.error(`❌ Validation failed: ${error.message}`);
       process.exit(1);

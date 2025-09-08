@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { writeFileSync, unlinkSync, existsSync, mkdirSync, rmdirSync } from 'fs';
+import { describe, it, expect, beforeEach, afterEach, afterAll } from 'vitest';
+import { writeFileSync, unlinkSync, existsSync, mkdirSync, rmSync } from 'fs';
 import { join } from 'path';
 import { XMLIntrospector } from '../../src/XMLIntrospector';
 import { SamplingStrategy } from '../../src/types';
@@ -11,9 +11,12 @@ describe('XMLIntrospector', () => {
 
   beforeEach(() => {
     introspector = new XMLIntrospector();
-    tempDir = join(process.cwd(), 'temp-test');
+    tempDir = join(process.cwd(), '.temp', 'unit-tests');
     
     // Create temp directory if it doesn't exist
+    if (!existsSync('.temp')) {
+      mkdirSync('.temp', { recursive: true });
+    }
     if (!existsSync(tempDir)) {
       mkdirSync(tempDir, { recursive: true });
     }
@@ -28,10 +31,16 @@ describe('XMLIntrospector', () => {
         unlinkSync(file);
       }
     });
-    
+  });
+
+  afterAll(() => {
     // Clean up temp directory
-    if (existsSync(tempDir)) {
-      rmdirSync(tempDir, { recursive: true });
+    try {
+      if (existsSync('.temp')) {
+        rmSync('.temp', { recursive: true, force: true });
+      }
+    } catch (error) {
+      // Ignore cleanup errors
     }
   });
 

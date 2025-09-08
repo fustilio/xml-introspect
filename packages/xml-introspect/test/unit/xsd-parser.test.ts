@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { writeFileSync, unlinkSync, existsSync, mkdirSync, rmdirSync } from 'fs';
+import { describe, it, expect, beforeEach, afterEach, afterAll } from 'vitest';
+import { writeFileSync, unlinkSync, existsSync, mkdirSync, rmSync } from 'fs';
 import { join } from 'path';
 import { XSDParser } from '../../src/XSDParser';
 
@@ -10,8 +10,12 @@ describe('XSD Parser and Unified XAST', () => {
 
   beforeEach(() => {
     parser = new XSDParser();
-    tempDir = join(process.cwd(), 'temp-xsd-test');
+    tempDir = join(process.cwd(), '.temp', 'xsd-tests');
     
+    // Create temp directory if it doesn't exist
+    if (!existsSync('.temp')) {
+      mkdirSync('.temp', { recursive: true });
+    }
     if (!existsSync(tempDir)) {
       mkdirSync(tempDir, { recursive: true });
     }
@@ -25,9 +29,16 @@ describe('XSD Parser and Unified XAST', () => {
         unlinkSync(file);
       }
     });
-    
-    if (existsSync(tempDir)) {
-      rmdirSync(tempDir, { recursive: true });
+  });
+
+  afterAll(() => {
+    // Clean up temp directory
+    try {
+      if (existsSync('.temp')) {
+        rmSync('.temp', { recursive: true, force: true });
+      }
+    } catch (error) {
+      // Ignore cleanup errors
     }
   });
 

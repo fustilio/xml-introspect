@@ -1,18 +1,34 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { execa } from 'execa';
 import { FormatProcessor } from '@xml-introspect/data-loader';
 import * as config from './xml-urls.config.json';
-import { writeFileSync, existsSync, mkdirSync } from 'fs';
+import { writeFileSync, existsSync, mkdirSync, rmSync } from 'fs';
 import { join } from 'path';
 
 describe('CLI XML URL Tests', () => {
   const dataLoader = new FormatProcessor();
-  const testDataDir = 'test/temp-url-data';
+  const testDataDir = '.temp/url-data';
   
   beforeAll(async () => {
+    // Create temp directory if it doesn't exist
+    if (!existsSync('.temp')) {
+      mkdirSync('.temp', { recursive: true });
+    }
+    
     // Create test data directory
     if (!existsSync(testDataDir)) {
       mkdirSync(testDataDir, { recursive: true });
+    }
+  });
+
+  afterAll(() => {
+    // Cleanup: Remove temp directory and all test files
+    try {
+      if (existsSync('.temp')) {
+        rmSync('.temp', { recursive: true, force: true });
+      }
+    } catch (error) {
+      // Ignore cleanup errors
     }
   });
 

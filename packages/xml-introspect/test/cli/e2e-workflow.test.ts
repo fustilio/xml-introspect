@@ -1,8 +1,11 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { execa } from 'execa';
-import { writeFileSync, unlinkSync, readFileSync, existsSync } from 'fs';
+import { writeFileSync, unlinkSync, readFileSync, existsSync, mkdirSync, rmSync } from 'fs';
+import { join } from 'path';
 
 describe('End-to-End Workflow Tests', () => {
+  const tempDir = '.temp';
+  
   // Test data for different scenarios
   const testData = {
     simple: {
@@ -20,11 +23,11 @@ describe('End-to-End Workflow Tests', () => {
   </Book>
 </Catalog>`,
       files: {
-        xml: 'workflow-test.xml',
-        xsd: 'workflow-test.xsd',
-        sample: 'workflow-sample.xml',
-        generated: 'workflow-generated.xml',
-        roundtrip: 'workflow-roundtrip.xml'
+        xml: join(tempDir, 'workflow-test.xml'),
+        xsd: join(tempDir, 'workflow-test.xsd'),
+        sample: join(tempDir, 'workflow-sample.xml'),
+        generated: join(tempDir, 'workflow-generated.xml'),
+        roundtrip: join(tempDir, 'workflow-roundtrip.xml')
       }
     },
     complex: {
@@ -58,10 +61,10 @@ describe('End-to-End Workflow Tests', () => {
   </Collections>
 </Library>`,
       files: {
-        xml: 'workflow-complex.xml',
-        xsd: 'workflow-complex.xsd',
-        sample: 'workflow-complex-sample.xml',
-        generated: 'workflow-complex-generated.xml'
+        xml: join(tempDir, 'workflow-complex.xml'),
+        xsd: join(tempDir, 'workflow-complex.xsd'),
+        sample: join(tempDir, 'workflow-complex-sample.xml'),
+        generated: join(tempDir, 'workflow-complex-generated.xml')
       }
     }
   };
@@ -118,6 +121,11 @@ describe('End-to-End Workflow Tests', () => {
 
   // Setup: Create test files
   beforeAll(() => {
+    // Create temp directory if it doesn't exist
+    if (!existsSync(tempDir)) {
+      mkdirSync(tempDir, { recursive: true });
+    }
+    
     // Create simple test file
     writeFileSync(testData.simple.files.xml, testData.simple.xml);
     
@@ -125,20 +133,15 @@ describe('End-to-End Workflow Tests', () => {
     writeFileSync(testData.complex.files.xml, testData.complex.xml);
   });
 
-  // Cleanup: Remove test files
+  // Cleanup: Remove temp directory and all test files
   afterAll(() => {
-    const allFiles = [
-      ...Object.values(testData.simple.files),
-      ...Object.values(testData.complex.files)
-    ];
-    
-    allFiles.forEach(file => {
-      try {
-        unlinkSync(file);
-      } catch (error) {
-        // Ignore cleanup errors
+    try {
+      if (existsSync(tempDir)) {
+        rmSync(tempDir, { recursive: true, force: true });
       }
-    });
+    } catch (error) {
+      // Ignore cleanup errors
+    }
   });
 
   // Test 1: Complete XML → XSD → Validate workflow
@@ -278,14 +281,14 @@ describe('End-to-End Workflow Tests', () => {
   it('should handle errors gracefully in workflows', async () => {
     // Test with non-existent file
     try {
-      await runCLICommand(['schema', 'non-existent.xml', 'test.xsd']);
+      await runCLICommand(['schema', 'non-existent.xml', join(tempDir, 'test.xsd')]);
       expect.fail('Should have thrown an error for non-existent file');
     } catch (error: any) {
       expect(error.message).toContain('ENOENT');
     }
 
     // Test with invalid XML
-    const invalidXmlFile = 'invalid.xml';
+    const invalidXmlFile = join(tempDir, 'invalid.xml');
     writeFileSync(invalidXmlFile, '<invalid>xml</invalid>');
     
     try {
@@ -295,34 +298,26 @@ describe('End-to-End Workflow Tests', () => {
       // Should handle the error gracefully
       expect(error.message).toBeDefined();
     }
-
-    // Cleanup
-    try {
-      unlinkSync(invalidXmlFile);
-    } catch {}
   }, 20000);
 
   // Test 8: Different multi-file modes
   it('should handle different multi-file modes', async () => {
     const { files } = testData.simple;
+    const comprehensiveXsd = join(tempDir, 'test-comprehensive.xsd');
+    const primaryXsd = join(tempDir, 'test-primary.xsd');
 
     // Test comprehensive mode
     await runCLICommand([
-      'schema', files.xml, 'test-comprehensive.xsd', 
+      'schema', files.xml, comprehensiveXsd, 
       '--no-prompt', '--multi-file-mode', 'comprehensive', '--verbose'
     ]);
-    await validateGeneratedXSD('test-comprehensive.xsd', files.xml);
+    await validateGeneratedXSD(comprehensiveXsd, files.xml);
 
     // Test primary-only mode
     await runCLICommand([
-      'schema', files.xml, 'test-primary.xsd', 
+      'schema', files.xml, primaryXsd, 
       '--no-prompt', '--multi-file-mode', 'primary-only', '--verbose'
     ]);
-    await validateGeneratedXSD('test-primary.xsd', files.xml);
-
-    // Cleanup
-    ['test-comprehensive.xsd', 'test-primary.xsd'].forEach(file => {
-      try { unlinkSync(file); } catch {}
-    });
+    await validateGeneratedXSD(primaryXsd, files.xml);
   }, 40000);
 });

@@ -1,7 +1,29 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { XMLIntrospector } from '../../src/XMLIntrospector';
+import { writeFileSync, unlinkSync, existsSync, mkdirSync, rmSync, readFileSync } from 'fs';
+import { join } from 'path';
 
 describe('XML Introspector Example Usage', () => {
+  const tempDir = '.temp';
+  
+  beforeAll(() => {
+    // Create temp directory if it doesn't exist
+    if (!existsSync(tempDir)) {
+      mkdirSync(tempDir, { recursive: true });
+    }
+  });
+
+  afterAll(() => {
+    // Cleanup: Remove temp directory and all test files
+    try {
+      if (existsSync(tempDir)) {
+        rmSync(tempDir, { recursive: true, force: true });
+      }
+    } catch (error) {
+      // Ignore cleanup errors
+    }
+  });
+
   it('should demonstrate basic functionality', async () => {
     console.log('🚀 Starting basic functionality test...');
     const introspector = new XMLIntrospector();
@@ -20,13 +42,11 @@ describe('XML Introspector Example Usage', () => {
 </LexicalResource>`;
 
     // Write to temporary file
-    const fs = require('fs');
-    const path = require('path');
-    const tempFile = path.join(process.cwd(), 'temp-example.xml');
+    const tempFile = join(tempDir, 'temp-example.xml');
     
     try {
       console.log('📝 Writing temp file...');
-      fs.writeFileSync(tempFile, xmlContent, 'utf8');
+      writeFileSync(tempFile, xmlContent, 'utf8');
       console.log('✅ Temp file written');
       
       // Test Task A: Generate XSD from XML
@@ -54,7 +74,7 @@ describe('XML Introspector Example Usage', () => {
       
       // Test Task D: Transform to small sample
       console.log('🔄 Testing big to small transformation...');
-      const outputFile = path.join(process.cwd(), 'temp-sample.xml');
+      const outputFile = join(tempDir, 'temp-sample.xml');
       await introspector.transformBigToSmall(tempFile, outputFile, {
         inputFile: tempFile,
         outputFile,
@@ -63,19 +83,19 @@ describe('XML Introspector Example Usage', () => {
       });
       console.log('✅ Transformation completed');
       
-      expect(fs.existsSync(outputFile)).toBe(true);
-      const sampleContent = fs.readFileSync(outputFile, 'utf8');
+      expect(existsSync(outputFile)).toBe(true);
+      const sampleContent = readFileSync(outputFile, 'utf8');
       expect(sampleContent).toContain('<LexicalResource>');
       expect(sampleContent).toContain('</LexicalResource>');
       
       // Clean up
-      fs.unlinkSync(outputFile);
+      unlinkSync(outputFile);
       console.log('✅ Test completed successfully');
       
     } finally {
       // Clean up temp file
-      if (fs.existsSync(tempFile)) {
-        fs.unlinkSync(tempFile);
+      if (existsSync(tempFile)) {
+        unlinkSync(tempFile);
         console.log('🧹 Cleaned up temp file');
       }
     }
@@ -138,8 +158,8 @@ describe('XML Introspector Example Usage', () => {
       console.log('✅ WordNet LMF test completed successfully');
       
     } finally {
-      if (fs.existsSync(tempFile)) {
-        fs.unlinkSync(tempFile);
+      if (existsSync(tempFile)) {
+        unlinkSync(tempFile);
         console.log('🧹 Cleaned up LMF temp file');
       }
     }

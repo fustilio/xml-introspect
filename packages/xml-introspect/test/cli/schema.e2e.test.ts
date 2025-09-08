@@ -1,8 +1,11 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { execa } from 'execa';
-import { writeFileSync, unlinkSync, readFileSync, existsSync } from 'fs';
+import { writeFileSync, unlinkSync, readFileSync, existsSync, mkdirSync, rmSync } from 'fs';
+import { join } from 'path';
 
 describe('CLI Schema Generation Tests', () => {
+  const tempDir = '.temp';
+  
   // Create a simple test XML file
   const testXmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 <LexicalResource xmlns:dc="http://purl.org/dc/elements/1.1/">
@@ -13,8 +16,8 @@ describe('CLI Schema Generation Tests', () => {
   </Lexicon>
 </LexicalResource>`;
 
-  const testXmlFile = 'test-input.xml';
-  const testXsdFile = 'test-output.xsd';
+  const testXmlFile = join(tempDir, 'test-input.xml');
+  const testXsdFile = join(tempDir, 'test-output.xsd');
 
   // Helper function to validate generated XSD
   async function validateGeneratedXSD(xsdFile: string, originalXmlFile: string): Promise<void> {
@@ -61,18 +64,20 @@ describe('CLI Schema Generation Tests', () => {
 
   // Setup: Create test XML file
   beforeAll(() => {
+    // Create temp directory if it doesn't exist
+    if (!existsSync(tempDir)) {
+      mkdirSync(tempDir, { recursive: true });
+    }
+    
     writeFileSync(testXmlFile, testXmlContent);
   });
 
-  // Cleanup: Remove test files
+  // Cleanup: Remove temp directory and all test files
   afterAll(() => {
     try {
-      unlinkSync(testXmlFile);
-      unlinkSync(testXsdFile);
-      // Clean up any other test files
-      ['test-comprehensive.xsd', 'test-primary.xsd', 'test-verbose.xsd', 'test-invalid.xsd'].forEach(file => {
-        try { unlinkSync(file); } catch {}
-      });
+      if (existsSync(tempDir)) {
+        rmSync(tempDir, { recursive: true, force: true });
+      }
     } catch (error) {
       // Ignore cleanup errors
     }
@@ -128,7 +133,7 @@ describe('CLI Schema Generation Tests', () => {
         'dist/cli.js',
         'schema',
         'non-existent-file.xml',
-        'test-error.xsd'
+        join(tempDir, 'test-error.xsd')
       ]);
       // If we get here, the test should fail
       expect.fail('Should have thrown an error for non-existent file');
@@ -140,26 +145,28 @@ describe('CLI Schema Generation Tests', () => {
 
   // Test multi-file mode options (simplified)
   it('should handle multi-file mode options', async () => {
+    const multifileXsd = join(tempDir, 'test-multifile.xsd');
+    
     try {
       // Use timeout to handle the hanging issue
-      const result = await execa('timeout', ['10', 'node', 'dist/cli.js', 'schema', testXmlFile, 'test-multifile.xsd', '--no-prompt', '--multi-file-mode', 'comprehensive', '--verbose'], {
+      const result = await execa('timeout', ['10', 'node', 'dist/cli.js', 'schema', testXmlFile, multifileXsd, '--no-prompt', '--multi-file-mode', 'comprehensive', '--verbose'], {
         timeout: 15000
       });
 
       // For single files, multi-file mode doesn't show the mode message, just normal completion
       expect(result.stdout).toContain('Command completed successfully');
-      expect(result.stdout).toContain('XSD saved to: test-multifile.xsd');
+      expect(result.stdout).toContain(`XSD saved to: ${multifileXsd}`);
     } catch (error: any) {
       // Handle timeout error (exit code 124) - this is expected since CLI hangs after completion
       if (error.exitCode === 124) {
         expect(error.stdout).toContain('Command completed successfully');
-        expect(error.stdout).toContain('XSD saved to: test-multifile.xsd');
+        expect(error.stdout).toContain(`XSD saved to: ${multifileXsd}`);
       } else {
         throw error;
       }
     }
 
     // Validate the generated XSD
-    await validateGeneratedXSD('test-multifile.xsd', testXmlFile);
+    await validateGeneratedXSD(multifileXsd, testXmlFile);
   }, 20000);
 });

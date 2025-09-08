@@ -1,0 +1,12 @@
+{
+    "private": true,
+    "scripts": {
+        "introspect": "xml-introspect",
+        "introspect:preview": "xml-introspect preview https://github.com/omwn/omw-data/releases/download/v1.4/omw-fr-1.4.tar.xz --verbose",
+        "introspect:schema": "xml-introspect schema https://github.com/omwn/omw-data/releases/download/v1.4/omw-fr-1.4.tar.xz --verbose omw-fr-1.4.xsd",
+        "introspect:validate": "xml-introspect validate https://github.com/omwn/omw-data/releases/download/v1.4/omw-fr-1.4.tar.xz ./omw-fr-1.4.xsd --verbose"
+    },
+    "dependencies": {
+        "xml-introspect": "workspace:*"
+    }
+}

@@ -39,6 +39,12 @@ importers:
         specifier: ^15.2.8
         version: 15.5.2
 
+  examples/cli:
+    dependencies:
+      xml-introspect:
+        specifier: workspace:*
+        version: link:../../packages/xml-introspect
+
   packages/data-loader:
     dependencies:
       fast-xml-parser:
