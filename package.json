@@ -33,7 +33,8 @@
     "build": "pnpm --filter ./packages/* build",
     "test": "pnpm --filter ./packages/* test",
     "dev": "pnpm --filter ./packages/* dev",
-    "clean": "pnpm --filter ./packages/* clean"
+    "clean": "pnpm --filter ./packages/* clean",
+    "publish-packages": "pnpm --filter ./packages/* publish --access public"
   },
   "lint-staged": {
     "*.{ts,js}": [

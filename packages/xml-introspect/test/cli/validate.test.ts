@@ -1,8 +1,11 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { execa } from 'execa';
-import { writeFileSync, unlinkSync, readFileSync, existsSync } from 'fs';
+import { writeFileSync, unlinkSync, readFileSync, existsSync, mkdirSync, rmSync } from 'fs';
+import { join } from 'path';
 
 describe('CLI Validate Command Tests', () => {
+  const tempDir = '.temp';
+  
   // Test data for different scenarios
   const testData = {
     valid: {
@@ -48,8 +51,8 @@ describe('CLI Validate Command Tests', () => {
   </xs:element>
 </xs:schema>`,
       files: {
-        xml: 'validate-valid.xml',
-        xsd: 'validate-valid.xsd'
+        xml: join(tempDir, 'validate-valid.xml'),
+        xsd: join(tempDir, 'validate-valid.xsd')
       }
     },
     invalid: {
@@ -96,8 +99,8 @@ describe('CLI Validate Command Tests', () => {
   </xs:element>
 </xs:schema>`,
       files: {
-        xml: 'validate-invalid.xml',
-        xsd: 'validate-invalid.xsd'
+        xml: join(tempDir, 'validate-invalid.xml'),
+        xsd: join(tempDir, 'validate-invalid.xsd')
       }
     },
     complex: {
@@ -202,8 +205,8 @@ describe('CLI Validate Command Tests', () => {
   </xs:element>
 </xs:schema>`,
       files: {
-        xml: 'validate-complex.xml',
-        xsd: 'validate-complex.xsd'
+        xml: join(tempDir, 'validate-complex.xml'),
+        xsd: join(tempDir, 'validate-complex.xsd')
       }
     }
   };
@@ -227,6 +230,11 @@ describe('CLI Validate Command Tests', () => {
 
   // Setup: Create test files
   beforeAll(() => {
+    // Create temp directory if it doesn't exist
+    if (!existsSync(tempDir)) {
+      mkdirSync(tempDir, { recursive: true });
+    }
+    
     // Create valid test files
     writeFileSync(testData.valid.files.xml, testData.valid.xml);
     writeFileSync(testData.valid.files.xsd, testData.valid.xsd);
@@ -240,21 +248,15 @@ describe('CLI Validate Command Tests', () => {
     writeFileSync(testData.complex.files.xsd, testData.complex.xsd);
   });
 
-  // Cleanup: Remove test files
+  // Cleanup: Remove temp directory and all test files
   afterAll(() => {
-    const allFiles = [
-      ...Object.values(testData.valid.files),
-      ...Object.values(testData.invalid.files),
-      ...Object.values(testData.complex.files)
-    ];
-    
-    allFiles.forEach(file => {
-      try {
-        unlinkSync(file);
-      } catch (error) {
-        // Ignore cleanup errors
+    try {
+      if (existsSync(tempDir)) {
+        rmSync(tempDir, { recursive: true, force: true });
       }
-    });
+    } catch (error) {
+      // Ignore cleanup errors
+    }
   });
 
   // Test 1: Valid XML validation
@@ -338,7 +340,7 @@ describe('CLI Validate Command Tests', () => {
   // Test 7: Invalid XML syntax (skipped due to CLI hanging issue)
   it.skip('should handle malformed XML gracefully', async () => {
     // This test is skipped due to the CLI hanging issue with invalid XML
-    const malformedXmlFile = 'malformed.xml';
+    const malformedXmlFile = join(tempDir, 'malformed.xml');
     writeFileSync(malformedXmlFile, '<invalid>xml</invalid>');
     
     try {
@@ -350,17 +352,12 @@ describe('CLI Validate Command Tests', () => {
       // Should handle the error gracefully
       expect(error.message).toBeDefined();
     }
-
-    // Cleanup
-    try {
-      unlinkSync(malformedXmlFile);
-    } catch {}
   }, 8000);
 
   // Test 8: Invalid XSD syntax (skipped due to CLI hanging issue)
   it.skip('should handle malformed XSD gracefully', async () => {
     // This test is skipped due to the CLI hanging issue with invalid XSD
-    const malformedXsdFile = 'malformed.xsd';
+    const malformedXsdFile = join(tempDir, 'malformed.xsd');
     writeFileSync(malformedXsdFile, '<invalid>xsd</invalid>');
     
     try {
@@ -372,11 +369,6 @@ describe('CLI Validate Command Tests', () => {
       // Should handle the error gracefully
       expect(error.message).toBeDefined();
     }
-
-    // Cleanup
-    try {
-      unlinkSync(malformedXsdFile);
-    } catch {}
   }, 8000);
 
   // Test 9: Missing required attributes
@@ -390,7 +382,7 @@ describe('CLI Validate Command Tests', () => {
   </Book>
 </Catalog>`;
     
-    const xmlFile = 'missing-attr.xml';
+    const xmlFile = join(tempDir, 'missing-attr.xml');
     writeFileSync(xmlFile, xmlWithMissingAttr);
     
     try {
@@ -404,11 +396,6 @@ describe('CLI Validate Command Tests', () => {
       // Should handle the error gracefully
       expect(error.message).toBeDefined();
     }
-
-    // Cleanup
-    try {
-      unlinkSync(xmlFile);
-    } catch {}
   }, 10000);
 
   // Test 10: Wrong element types
@@ -422,7 +409,7 @@ describe('CLI Validate Command Tests', () => {
   </Book>
 </Catalog>`;
     
-    const xmlFile = 'wrong-type.xml';
+    const xmlFile = join(tempDir, 'wrong-type.xml');
     writeFileSync(xmlFile, xmlWithWrongType);
     
     try {
@@ -436,11 +423,6 @@ describe('CLI Validate Command Tests', () => {
       // Should handle the error gracefully
       expect(error.message).toBeDefined();
     }
-
-    // Cleanup
-    try {
-      unlinkSync(xmlFile);
-    } catch {}
   }, 10000);
 
   // Test 11: Multiple validation errors
@@ -455,7 +437,7 @@ describe('CLI Validate Command Tests', () => {
   <InvalidElement>This should not be here</InvalidElement>
 </Catalog>`;
     
-    const xmlFile = 'multiple-errors.xml';
+    const xmlFile = join(tempDir, 'multiple-errors.xml');
     writeFileSync(xmlFile, xmlWithMultipleErrors);
     
     try {
@@ -469,16 +451,11 @@ describe('CLI Validate Command Tests', () => {
       // Should handle the error gracefully
       expect(error.message).toBeDefined();
     }
-
-    // Cleanup
-    try {
-      unlinkSync(xmlFile);
-    } catch {}
   }, 10000);
 
   // Test 12: Empty XML file
   it('should handle empty XML file gracefully', async () => {
-    const emptyXmlFile = 'empty.xml';
+    const emptyXmlFile = join(tempDir, 'empty.xml');
     writeFileSync(emptyXmlFile, '');
     
     try {
@@ -490,16 +467,11 @@ describe('CLI Validate Command Tests', () => {
       // Should handle the error gracefully
       expect(error.message).toBeDefined();
     }
-
-    // Cleanup
-    try {
-      unlinkSync(emptyXmlFile);
-    } catch {}
   }, 10000);
 
   // Test 13: Empty XSD file
   it('should handle empty XSD file gracefully', async () => {
-    const emptyXsdFile = 'empty.xsd';
+    const emptyXsdFile = join(tempDir, 'empty.xsd');
     writeFileSync(emptyXsdFile, '');
     
     try {
@@ -511,10 +483,5 @@ describe('CLI Validate Command Tests', () => {
       // Should handle the error gracefully
       expect(error.message).toBeDefined();
     }
-
-    // Cleanup
-    try {
-      unlinkSync(emptyXsdFile);
-    } catch {}
   }, 10000);
 });

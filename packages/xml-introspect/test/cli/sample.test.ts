@@ -1,8 +1,11 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { execa } from 'execa';
-import { writeFileSync, unlinkSync, readFileSync, existsSync } from 'fs';
+import { writeFileSync, unlinkSync, readFileSync, existsSync, mkdirSync, rmSync } from 'fs';
+import { join } from 'path';
 
 describe('CLI Sample Command Tests', () => {
+  const tempDir = '.temp';
+  
   // Test data for different scenarios
   const testData = {
     simple: {
@@ -25,8 +28,8 @@ describe('CLI Sample Command Tests', () => {
   </Book>
 </Catalog>`,
       files: {
-        xml: 'sample-test.xml',
-        output: 'sample-output.xml'
+        xml: join(tempDir, 'sample-test.xml'),
+        output: join(tempDir, 'sample-output.xml')
       }
     },
     complex: {
@@ -92,8 +95,8 @@ describe('CLI Sample Command Tests', () => {
   </Collections>
 </Library>`,
       files: {
-        xml: 'sample-complex.xml',
-        output: 'sample-complex-output.xml'
+        xml: join(tempDir, 'sample-complex.xml'),
+        output: join(tempDir, 'sample-complex-output.xml')
       }
     }
   };
@@ -117,6 +120,11 @@ describe('CLI Sample Command Tests', () => {
 
   // Setup: Create test files
   beforeAll(() => {
+    // Create temp directory if it doesn't exist
+    if (!existsSync(tempDir)) {
+      mkdirSync(tempDir, { recursive: true });
+    }
+    
     // Create simple test file
     writeFileSync(testData.simple.files.xml, testData.simple.xml);
     
@@ -124,25 +132,15 @@ describe('CLI Sample Command Tests', () => {
     writeFileSync(testData.complex.files.xml, testData.complex.xml);
   });
 
-  // Cleanup: Remove test files
+  // Cleanup: Remove temp directory and all test files
   afterAll(() => {
-    const allFiles = [
-      ...Object.values(testData.simple.files),
-      ...Object.values(testData.complex.files),
-      'sample-test-output.xml',
-      'sample-complex-output.xml',
-      'sample-verbose-output.xml',
-      'sample-max-elements-output.xml',
-      'sample-max-depth-output.xml'
-    ];
-    
-    allFiles.forEach(file => {
-      try {
-        unlinkSync(file);
-      } catch (error) {
-        // Ignore cleanup errors
+    try {
+      if (existsSync(tempDir)) {
+        rmSync(tempDir, { recursive: true, force: true });
       }
-    });
+    } catch (error) {
+      // Ignore cleanup errors
+    }
   });
 
   // Test 1: Basic sample generation
@@ -166,7 +164,7 @@ describe('CLI Sample Command Tests', () => {
   // Test 2: Sample generation with max-elements option
   it('should respect max-elements option', async () => {
     const { files } = testData.simple;
-    const outputFile = 'sample-max-elements-output.xml';
+    const outputFile = join(tempDir, 'sample-max-elements-output.xml');
 
     const output = await runCLICommand([
       'sample', files.xml, outputFile, '--max-elements', '2', '--verbose'
@@ -188,7 +186,7 @@ describe('CLI Sample Command Tests', () => {
   // Test 3: Sample generation with max-depth option
   it('should respect max-depth option', async () => {
     const { files } = testData.complex;
-    const outputFile = 'sample-max-depth-output.xml';
+    const outputFile = join(tempDir, 'sample-max-depth-output.xml');
 
     const output = await runCLICommand([
       'sample', files.xml, outputFile, '--max-depth', '3', '--verbose'
@@ -241,9 +239,10 @@ describe('CLI Sample Command Tests', () => {
   // Test 6: Verbose output
   it('should show verbose output when --verbose flag is used', async () => {
     const { files } = testData.simple;
+    const outputFile = join(tempDir, 'sample-verbose-output.xml');
 
     const output = await runCLICommand([
-      'sample', files.xml, 'sample-verbose-output.xml', '--verbose'
+      'sample', files.xml, outputFile, '--verbose'
     ]);
     
     // Should contain verbose messages
@@ -257,7 +256,7 @@ describe('CLI Sample Command Tests', () => {
   it('should handle non-existent file gracefully', async () => {
     try {
       await runCLICommand([
-        'sample', 'non-existent.xml', 'output.xml'
+        'sample', 'non-existent.xml', join(tempDir, 'output.xml')
       ]);
       expect.fail('Should have thrown an error for non-existent file');
     } catch (error: any) {
@@ -269,12 +268,12 @@ describe('CLI Sample Command Tests', () => {
   it.skip('should handle invalid XML gracefully', async () => {
     // This test is skipped due to the CLI hanging issue with invalid XML
     // The CLI appears to hang when processing invalid XML files
-    const invalidXmlFile = 'invalid-sample.xml';
+    const invalidXmlFile = join(tempDir, 'invalid-sample.xml');
     writeFileSync(invalidXmlFile, '<invalid>xml</invalid>');
     
     try {
       await runCLICommand([
-        'sample', invalidXmlFile, 'output.xml'
+        'sample', invalidXmlFile, join(tempDir, 'output.xml')
       ], 3000); // Very short timeout for this test
       expect.fail('Should have thrown an error for invalid XML');
     } catch (error: any) {
@@ -291,7 +290,7 @@ describe('CLI Sample Command Tests', () => {
   // Test 9: Single max-elements test
   it('should handle max-elements option with value 1', async () => {
     const { files } = testData.simple;
-    const outputFile = 'sample-max-1.xml';
+    const outputFile = join(tempDir, 'sample-max-1.xml');
     
     const output = await runCLICommand([
       'sample', files.xml, outputFile, '--max-elements', '1'
@@ -299,17 +298,12 @@ describe('CLI Sample Command Tests', () => {
     
     expect(output).toContain('Command completed successfully');
     expect(existsSync(outputFile)).toBe(true);
-    
-    // Cleanup
-    try {
-      unlinkSync(outputFile);
-    } catch {}
   }, 20000);
 
   // Test 10: Single max-depth test
   it('should handle max-depth option with value 2', async () => {
     const { files } = testData.complex;
-    const outputFile = 'sample-depth-2.xml';
+    const outputFile = join(tempDir, 'sample-depth-2.xml');
     
     const output = await runCLICommand([
       'sample', files.xml, outputFile, '--max-depth', '2'
@@ -317,17 +311,12 @@ describe('CLI Sample Command Tests', () => {
     
     expect(output).toContain('Command completed successfully');
     expect(existsSync(outputFile)).toBe(true);
-    
-    // Cleanup
-    try {
-      unlinkSync(outputFile);
-    } catch {}
   }, 20000);
 
   // Test 11: Combined options
   it('should handle combined max-elements and max-depth options', async () => {
     const { files } = testData.complex;
-    const outputFile = 'sample-combined-output.xml';
+    const outputFile = join(tempDir, 'sample-combined-output.xml');
 
     const output = await runCLICommand([
       'sample', files.xml, outputFile, 
