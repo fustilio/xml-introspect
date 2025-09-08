@@ -33,6 +33,8 @@ test/
 - CLI argument parsing
 - End-to-end CLI workflows
 - Output validation
+- Sample command tests
+- Validate command tests
 
 ### Unit Tests (`test/unit/`)
 - Core functionality tests
@@ -97,3 +99,15 @@ Each environment has its own Vitest configuration:
 3. Use descriptive test names
 4. Include both positive and negative test cases
 5. Add appropriate timeouts for slow operations
+
+## CLI Test Files
+
+- `basic-usage.test.ts` - Basic CLI functionality tests
+- `e2e-workflow.test.ts` - End-to-end workflow tests
+- `help.test.ts` - Help command tests
+- `preview.e2e.test.ts` - Preview command tests with URLs
+- `schema.e2e.test.ts` - Schema generation tests
+- `sample.test.ts` - Sample command tests
+- `validate.test.ts` - Validate command tests
+- `verbose.test.ts` - Verbose output tests
+- `xml-urls.test.ts` - URL processing tests
