@@ -1,6 +1,6 @@
 {
   "name": "xml-introspect",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT",
   "author": "fustilio",
   "type": "module",
@@ -73,5 +73,10 @@
   },
   "bin": {
     "xml-introspect": "./dist/cli.js"
-  }
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE"
+  ]
 }

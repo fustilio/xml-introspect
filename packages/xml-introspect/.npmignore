@@ -1,0 +1,26 @@
+# Source files (only include compiled dist)
+src/
+scripts/
+bench/
+
+# Test files
+test/
+test-*.xml
+*.test.ts
+*.test.js
+
+# Build configuration
+vite*.config.ts
+vitest*.config.ts
+tsconfig.json
+
+# Development files
+env.example
+index.ts
+
+# Large data files
+data/input/
+data/output/
+
+# Development dependencies
+node_modules/
