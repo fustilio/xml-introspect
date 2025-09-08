@@ -1,85 +1,67 @@
 # Data Sources
 
-Supported formats and real-world data sources for XML Introspect.
+Supported formats and data sources for XML Introspect.
 
 ## Supported Formats
 
 ### Compression Formats
 
-- **Gzip** - GNU zip compression
-- **XZ** - XZ compression with LZMA2
-- **Tar** - Tape archive format
-- **XML** - Direct XML processing
+- **Gzip** - GNU zip compression (.gz)
+- **XZ** - XZ compression with LZMA2 (.xz)
+- **Tar** - Tape archive format (.tar, .tar.gz, .tar.xz)
+- **XML** - Direct XML processing (.xml)
 
 ### Data Types
 
-- **LMF** - Lexical Markup Framework (WordNet)
+- **XML** - Extensible Markup Language
 - **TSV** - Tab-separated values
-- **ILI** - Interlingual Index (CILI)
+- **Unknown** - Fallback for unrecognized formats
 
-## Real Data Sources
+## Example Data Sources
 
-### WordNet LMF
+### Public XML Datasets
 
-**English WordNet:**
-- URL: `https://en-word.net/static/english-wordnet-2024.xml.gz`
-- Format: Gzipped XML
-- Size: ~100MB compressed, ~500MB uncompressed
-- Elements: 1.6M+ lines
+**Large XML Files:**
+- Various public datasets in XML format
+- Compressed archives containing XML files
+- Multi-file XML packages
 
-**French WordNet:**
-- URL: `https://en-word.net/static/french-wordnet-2024.xml.gz`
-- Format: Gzipped XML
-- Language: French
-
-**German WordNet:**
-- URL: `https://en-word.net/static/german-wordnet-2024.xml.gz`
-- Format: Gzipped XML
-- Language: German
-
-### Open Multilingual WordNet (OMW)
-
-**Multi-language support:**
-- 30+ languages available
-- Tar.xz compressed archives
-- LMF format
-
-### CILI (Collaborative Interlingual Index)
-
-**Interlingual Index:**
-- Cross-language word mappings
-- TSV format
-- Multiple language pairs
+**Common Sources:**
+- Government open data portals
+- Academic research datasets
+- Open source project data
+- API responses in XML format
 
 ## Usage Examples
 
-### Process WordNet Data
+### Process XML Data from URL
 
 ```bash
-# Download and sample English WordNet
-xml-introspect sample https://en-word.net/static/english-wordnet-2024.xml.gz wordnet-sample.xml
+# Download and sample XML data
+xml-introspect sample https://example.com/data.xml.gz sample.xml
 
 # Generate schema
-xml-introspect schema wordnet-sample.xml wordnet-schema.xsd
+xml-introspect schema sample.xml schema.xsd
 ```
 
-### Process from URL
+### Process from URL Programmatically
 
 ```typescript
 import { FormatProcessor } from 'xml-introspect/data-loader';
 
 const processor = new FormatProcessor();
 
-const response = await fetch('https://en-word.net/static/english-wordnet-2024.xml.gz');
+const response = await fetch('https://example.com/data.xml.gz');
 const arrayBuffer = await response.arrayBuffer();
 
 const result = await processor.processData(arrayBuffer, {
-  projectId: 'oewn:2024',
+  projectId: 'my-project',
   enableTarExtraction: true
 });
 
 if (result.success) {
   console.log('Processed XML:', result.xmlContent);
+  console.log('Content type:', result.contentType);
 }
 ```
 
@@ -89,9 +71,9 @@ if (result.success) {
 import { ContentTypeDetector } from 'xml-introspect/data-loader';
 
 const detector = new ContentTypeDetector();
-const analysis = detector.detectContentType(xmlText, 'oewn:2024');
+const analysis = detector.detectContentType(xmlText, 'my-project');
 
-console.log('Type:', analysis.type);        // 'lmf', 'xml', 'tar', 'tsv', 'ili'
+console.log('Type:', analysis.type);        // 'xml', 'tar', 'tsv', 'unknown'
 console.log('Confidence:', analysis.confidence); // 'high', 'medium', 'low'
 ```
 
@@ -101,7 +83,7 @@ console.log('Confidence:', analysis.confidence); // 'high', 'medium', 'low'
 
 - **Memory Efficient**: Streams files of any size
 - **Processing Speed**: ~50MB/s for gzip, ~20MB/s for xz
-- **Real Data**: Successfully processes 1.6M+ line WordNet files
+- **Scalable**: Successfully processes files with millions of elements
 
 ### Optimization Tips
 

@@ -1,52 +1,58 @@
-# XML Introspect Docs
+# XML Introspect Documentation
 
-Everything you need to know about XML Introspect.
+Welcome to XML Introspect - a powerful tool for analyzing, processing, and generating XML data.
 
-## Quick Start
+## 📚 Documentation Structure
+
+### 🚀 Getting Started
+- **[Quick Start Guide](getting-started.md)** - Start here! Install and basic usage
+- **[Installation & Setup](getting-started.md#installation)** - Detailed installation instructions
+
+### 📖 User Guides
+- **[CLI Reference](cli-reference.md)** - Complete command-line interface documentation
+- **[API Reference](api-reference.md)** - TypeScript/JavaScript API documentation
+- **[Data Sources](data-sources.md)** - Supported formats and data sources
+
+### 🎯 Examples & Tutorials
+- **[Examples](examples/)** - Real-world usage examples and tutorials
+- **[Advanced Usage](examples/advanced/)** - Complex scenarios and best practices
+
+### 🔧 Technical Documentation
+- **[Architecture](technical/architecture.md)** - System design and components
+- **[UNIST Utilities](technical/unist-utilities.md)** - XML tree processing utilities
+- **[Plugin System](technical/plugin-system.md)** - Extending XML Introspect
+
+## 🎯 Quick Start
 
 ```bash
+# Install
 npm install xml-introspect
+
+# Sample large XML file
 xml-introspect sample input.xml output.xml
-```
 
-## Documentation
-
-- [Getting Started](getting-started.md) - Install and basic usage
-- [CLI Reference](cli-reference.md) - All commands and options
-- [API Reference](api-reference.md) - TypeScript/JavaScript API
-- [Examples](examples/) - Real usage examples
-- [Data Sources](data-sources.md) - Supported formats
-
-## Common Tasks
-
-**Sample large XML:**
-```bash
-xml-introspect sample large-file.xml sample.xml --max-elements 100
-```
-
-**Generate schema:**
-```bash
+# Generate XSD schema
 xml-introspect schema data.xml schema.xsd
+
+# Process from URL
+xml-introspect sample https://example.com/data.xml.gz output.xml
 ```
 
-**Process from URL:**
-```bash
-xml-introspect sample https://en-word.net/static/english-wordnet-2024.xml.gz output.xml
-```
+## 📦 Package Documentation
 
-**Generate test data:**
-```bash
-xml-introspect realistic template.xml test-data.xml --seed 42
-```
+- **[Main Package](../packages/xml-introspect/README.md)** - Core XML processing functionality
+- **[Data Loader](../packages/data-loader/README.md)** - Generic data loading and format processing
 
-## Package Docs
+## 🤝 Support
 
-- [Main Package](../packages/xml-introspect/README.md)
-- [Data Loader](../packages/data-loader/src/formats/README.md)
+- **[GitHub Issues](https://github.com/fustilio/xml-introspect/issues)** - Bug reports and feature requests
+- **[Discussions](https://github.com/fustilio/xml-introspect/discussions)** - Community discussions
+- **[Contributing](../CONTRIBUTING.md)** - How to contribute to the project
 
-## Support
-
-- [Issues](https://github.com/fustilio/xml-introspect/issues)
-- [Discussions](https://github.com/fustilio/xml-introspect/discussions)
+## 📄 License
 
 MIT License - see [LICENSE](../LICENSE)
+
+---
+
+**New to XML Introspect?** Start with the [Quick Start Guide](getting-started.md) to get up and running in minutes.

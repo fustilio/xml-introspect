@@ -1,5 +1,11 @@
 # xml-introspect
 
+## 0.3.2
+
+### Patch Changes
+
+- add root index.js export for cdn
+
 ## 0.3.1
 
 ### Patch Changes

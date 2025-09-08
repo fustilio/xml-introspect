@@ -29,7 +29,7 @@ xml-introspect sample <input> <output> [options]
 ```bash
 xml-introspect sample input.xml output.xml
 xml-introspect sample input.xml output.xml --max-elements 200 --max-depth 3
-xml-introspect sample https://en-word.net/static/english-wordnet-2024.xml.gz sample.xml
+xml-introspect sample https://example.com/data.xml.gz sample.xml
 ```
 
 ### `schema` - Generate XSD
@@ -120,32 +120,17 @@ xml-introspect realistic template.xml realistic.xml --max-elements 200 --seed 42
 
 ## Examples
 
-### Processing WordNet Data
-
 ```bash
-# Download and sample WordNet data
-xml-introspect sample https://en-word.net/static/english-wordnet-2024.xml.gz wordnet-sample.xml
+# Process large XML data
+xml-introspect sample https://example.com/data.xml.gz sample.xml
+xml-introspect schema sample.xml schema.xsd
 
-# Generate schema from WordNet data
-xml-introspect schema wordnet-sample.xml wordnet-schema.xsd
-
-# Generate realistic WordNet-like data
-xml-introspect realistic wordnet-schema.xsd realistic-wordnet.xml --max-elements 500
-```
-
-### Batch Processing
-
-```bash
-# Process multiple files
+# Batch processing
 for file in *.xml; do
   xml-introspect sample "$file" "sample-$file" --max-elements 50
 done
-```
 
-### Integration with Other Tools
-
-```bash
-# Generate sample and validate
+# Complete pipeline
 xml-introspect sample input.xml sample.xml
 xml-introspect schema sample.xml schema.xsd
 xml-introspect validate sample.xml schema.xsd

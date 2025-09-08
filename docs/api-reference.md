@@ -2,6 +2,44 @@
 
 Complete TypeScript/JavaScript API documentation for XML Introspect.
 
+## Browser Usage (CDN)
+
+XML Introspect can be used directly in the browser via CDN. Use the browser-compatible version:
+
+```html
+<script type="module">
+  import { StandaloneBrowserXMLIntrospector } from 'https://cdn.observableusercontent.com/npm/xml-introspect@0.3.1/browser.js';
+  
+  const introspector = new StandaloneBrowserXMLIntrospector();
+  
+  // Analyze XML content
+  const analysis = await introspector.analyzeContentStructure(xmlContent);
+  console.log(analysis);
+</script>
+```
+
+### Browser API
+
+The browser version provides a simplified API optimized for client-side usage:
+
+```typescript
+import { StandaloneBrowserXMLIntrospector } from 'https://cdn.observableusercontent.com/npm/xml-introspect@0.3.1/browser.js';
+
+const introspector = new StandaloneBrowserXMLIntrospector();
+
+// Analyze XML structure
+const structure = await introspector.analyzeContent(xmlContent);
+
+// Get content preview
+const preview = introspector.getContentPreview(xmlContent, 100);
+
+// Validate XML
+const validation = await introspector.validateContent(xmlContent);
+
+// Comprehensive analysis
+const analysis = await introspector.analyzeContentStructure(xmlContent);
+```
+
 ## XMLIntrospector
 
 Main class for XML analysis and processing.
@@ -173,8 +211,56 @@ interface FormatProcessingResult {
   success: boolean;
   xmlContent?: string;
   error?: string;
-  contentType: 'lmf' | 'xml' | 'tar' | 'tsv' | 'ili' | 'unknown';
+  contentType: 'xml' | 'tar' | 'tsv' | 'unknown';
   confidence: 'high' | 'medium' | 'low';
   processingSteps: string[];
+  extractedXmlFiles?: ExtractedFile[];
+}
+```
+
+### Browser Types
+
+#### StandaloneXMLStructure
+
+```typescript
+interface StandaloneXMLStructure {
+  elementCounts: Record<string, number>;
+  attributeCounts: Record<string, number>;
+  rootElements: string[];
+  commonElements: Array<{ name: string; count: number }>;
+  attributes: Array<{ name: string; count: number }>;
+  maxDepth: number;
+  totalElements: number;
+}
+```
+
+#### StandaloneContentPreview
+
+```typescript
+interface StandaloneContentPreview {
+  firstLines: string[];
+  lastLines: string[];
+  totalLines: number;
+  preview: string;
+}
+```
+
+#### StandaloneValidationResult
+
+```typescript
+interface StandaloneValidationResult {
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+}
+```
+
+#### StandaloneContentAnalysis
+
+```typescript
+interface StandaloneContentAnalysis {
+  structure: StandaloneXMLStructure;
+  preview: StandaloneContentPreview;
+  validation: StandaloneValidationResult;
 }
 ```
