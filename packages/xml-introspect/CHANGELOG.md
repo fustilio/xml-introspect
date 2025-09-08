@@ -1,5 +1,11 @@
 # xml-introspect
 
+## 0.2.1
+
+### Patch Changes
+
+- fix validate command url handling
+
 ## 0.2.0
 
 ### Minor Changes

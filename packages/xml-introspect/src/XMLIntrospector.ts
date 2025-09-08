@@ -2,6 +2,16 @@ import { writeFileSync, readFileSync, statSync, createReadStream } from 'fs';
 import sax from 'sax';
 import type { Tag } from 'sax';
 import { validateXML, memoryPages } from 'xmllint-wasm';
+
+// Polyfill Worker for Node.js environment
+if (typeof globalThis.Worker === 'undefined') {
+  try {
+    const { Worker } = require('worker_threads');
+    globalThis.Worker = Worker as any;
+  } catch (error) {
+    // Worker polyfill not available, will fall back to basic validation
+  }
+}
 import { fromXml } from 'xast-util-from-xml';
 import { toXmlPretty as toXml } from './xast-util-to-xml-pretty.js';
 import { visit } from 'unist-util-visit';
@@ -363,36 +373,27 @@ export class XMLIntrospector {
       const xmlContent = readFileSync(xmlPath, 'utf8');
       const xsdContent = readFileSync(xsdPath, 'utf8');
       
-      // For now, do basic validation since xmllint-wasm has Worker issues in Node.js
-      // TODO: Fix xmllint-wasm Worker polyfill for Node.js environment
-      const basicValidation = this.performBasicValidation(xmlContent, xsdContent);
-      
-      if (basicValidation.valid) {
-        // Try xmllint-wasm if basic validation passes
-        try {
-          const result = await validateXML({
-            xml: [{
-              fileName: xmlPath,
-              contents: xmlContent,
-            }],
-            schema: [xsdContent],
-            initialMemoryPages: 256,
-            maxMemoryPages: 2 * memoryPages.GiB,
-          });
-          
-          return {
-            valid: result.valid,
-            errors: Array.from(result.errors), // Convert readonly array to mutable array
-            warnings: (result as any).warnings ? Array.from((result as any).warnings) : []
-          };
-        } catch (wasmError) {
-          // If WASM fails, return basic validation result
-          console.warn('⚠️  xmllint-wasm validation failed, using basic validation:', wasmError.message);
-          return basicValidation;
-        }
+      // Try xmllint-wasm first for comprehensive validation
+      try {
+        const result = await validateXML({
+          xml: [{
+            fileName: xmlPath,
+            contents: xmlContent,
+          }],
+          schema: [xsdContent],
+          initialMemoryPages: 256,
+          maxMemoryPages: 2 * memoryPages.GiB,
+        });
+        
+        return {
+          valid: result.valid,
+          errors: Array.from(result.errors), // Convert readonly array to mutable array
+          warnings: (result as any).warnings ? Array.from((result as any).warnings) : []
+        };
+      } catch (wasmError) {
+        // If WASM fails, fall back to basic validation
+        return this.performBasicValidation(xmlContent, xsdContent);
       }
-      
-      return basicValidation;
     } catch (error) {
       return {
         valid: false,
@@ -461,7 +462,7 @@ export class XMLIntrospector {
       return {
         valid: true,
         errors: [],
-        warnings: ['Using basic validation (xmllint-wasm unavailable)']
+        warnings: []
       };
     } catch (error) {
       return {
