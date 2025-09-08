@@ -1,6 +1,6 @@
 {
   "name": "xml-introspect",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "license": "MIT",
   "author": "fustilio",
   "type": "module",
@@ -41,7 +41,7 @@
   "dependencies": {
     "@faker-js/faker": "^9.9.0",
     "@types/inquirer": "^9.0.9",
-    "@xml-introspect/data-loader": "workspace:*",
+    "@fustilio/data-loader": "workspace:*",
     "commander": "^14.0.0",
     "deep-equal": "^2.2.3",
     "inquirer": "^12.9.4",
