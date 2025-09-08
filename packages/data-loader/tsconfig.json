@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "ESNext",
+    "module": "NodeNext",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "allowJs": true,
@@ -10,7 +10,7 @@
     "forceConsistentCasingInFileNames": true,
     "declaration": true,
     "rootDir": "./src",
-    "moduleResolution": "nodenext"
+    "moduleResolution": "NodeNext"
   },
   "include": [
     "src/**/*"

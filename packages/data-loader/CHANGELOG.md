@@ -1,5 +1,11 @@
 # @fustilio/data-loader
 
+## 0.3.0
+
+### Minor Changes
+
+- refactor data-loader to be agnostic
+
 ## 0.2.0
 
 ### Minor Changes

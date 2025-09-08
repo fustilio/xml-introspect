@@ -6,11 +6,11 @@ describe('CLI Verbose Mode', () => {
     const { stdout } = await execa('node', ['dist/cli.js', 'schema', 'data/input/oewn.xml']);
     
     // Should not contain verbose messages
-    expect(stdout).not.toContain('📁 Input file:');
-    expect(stdout).not.toContain('📄 Output file:');
+    expect(stdout).not.toContain('📁 Input:');
+    expect(stdout).not.toContain('📄 Output:');
     expect(stdout).not.toContain('🔧 Command:');
     expect(stdout).not.toContain('📊 Analyzing XML file:');
-    expect(stdout).not.toContain('🔄 Using in-memory analysis:');
+    expect(stdout).not.toContain('🔄 Using in-memory analysis...');
     
     // Should still show essential output
     expect(stdout).toContain('🚀 Starting XML Introspector CLI...');
@@ -22,8 +22,8 @@ describe('CLI Verbose Mode', () => {
     const { stdout } = await execa('node', ['dist/cli.js', 'schema', 'data/input/oewn.xml', '--verbose']);
     
     // Should contain verbose messages
-    expect(stdout).toContain('📁 Input file: data/input/oewn.xml');
-    expect(stdout).toContain('📄 Output file: stdout');
+    expect(stdout).toContain('📁 Input: data/input/oewn.xml');
+    expect(stdout).toContain('📄 Output: stdout');
     expect(stdout).toContain('🔧 Command: schema');
     expect(stdout).toContain('📊 Analyzing XML file:');
     expect(stdout).toContain('🔄 Using in-memory analysis...');
@@ -40,8 +40,8 @@ describe('CLI Verbose Mode', () => {
     const { stdout } = await execa('node', ['dist/cli.js', 'schema', 'data/input/oewn.xml', '-v']);
     
     // Should contain verbose messages
-    expect(stdout).toContain('📁 Input file: data/input/oewn.xml');
-    expect(stdout).toContain('📄 Output file: stdout');
+    expect(stdout).toContain('📁 Input: data/input/oewn.xml');
+    expect(stdout).toContain('📄 Output: stdout');
     expect(stdout).toContain('🔧 Command: schema');
     expect(stdout).toContain('📊 Analyzing XML file:');
     expect(stdout).toContain('🔄 Using in-memory analysis...');

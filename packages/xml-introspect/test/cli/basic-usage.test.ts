@@ -3,8 +3,8 @@ import { execa } from 'execa';
 
 describe('CLI Basic Usage', () => {
   it('should execute a basic command successfully', async () => {
-    const { stdout } = await execa('node', ['dist/cli.js', '--help']);
-    expect(stdout).toContain('XML Introspector CLI Tool'); // Expect help output
+    const { stderr } = await execa('node', ['dist/cli.js', '--help']);
+    expect(stderr).toContain('XML Introspector CLI Tool'); // Commander.js outputs help to stderr
   });
 
   it('should process a valid input file', async () => {

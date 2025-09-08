@@ -1,5 +1,5 @@
 
-export type ContentType = "xml" | "lmf" | "ili" | "tsv" | "tar" | "unknown";
+export type ContentType = "xml" | "tsv" | "tar" | "unknown";
 
 export interface ContentAnalysis {
   type: ContentType;
@@ -71,12 +71,9 @@ export class ContentTypeDetector {
        trimmedContent.includes("\x1f") || // control characters
        trimmedContent.includes("\x7f"));  // delete character
 
-    // Check for LMF XML content
+    // Check for TSV content
     const hasTabs = trimmedContent.includes("\t");
     const hasTSVStructure = hasTabs && trimmedContent.includes("\n");
-    
-    // Check for ILI content
-    const hasILIStructure = trimmedContent.includes("ili") && trimmedContent.includes("status");
 
     // Determine content type with confidence
     let type: ContentType;
@@ -88,19 +85,14 @@ export class ContentTypeDetector {
       type = "tar";
       confidence = hasTarHeader ? "high" : "medium";
     }
-    // Check for LMF XML content (only if no tar indicators)
+    // Check for XML content (only if no tar indicators)
     else if (hasXMLContent && !hasTarHeader) {
-      type = "lmf";
+      type = "xml";
       confidence = "high";
     }
-    // Check for ILI/TSV content (only if we're sure it's not a tar archive)
+    // Check for TSV content (only if we're sure it's not a tar archive)
     else if (hasTSVStructure && !hasTarHeader && !isOMWPackage) {
       type = "tsv";
-      confidence = "medium";
-    }
-    // Check for ILI content
-    else if (hasILIStructure) {
-      type = "ili";
       confidence = "medium";
     }
     // Fallback to XML if we have some XML-like content

@@ -167,8 +167,8 @@ async function processUrlOrFile(input: string, projectId: string = 'unknown'): P
     // Return the temp file path with multi-file information if available
     const tempResult = {
       filePath: tempFile,
-      __multiFileMode: result.__multiFileMode || false,
-      __allXmlFiles: result.__allXmlFiles || []
+      __multiFileMode: (result.extractedXmlFiles && result.extractedXmlFiles.length > 0) || false,
+      __allXmlFiles: result.extractedXmlFiles || []
     };
     
     return tempResult;
@@ -223,6 +223,7 @@ program
   .action(async (input, output, options) => {
     try {
       verbose = program.opts().verbose || false;
+      let xsd: string = '';
     
     console.log(`🚀 Starting XML Introspector CLI...`);
       logVerbose(`📁 Input: ${input}`);
@@ -237,7 +238,6 @@ program
       const projectId = getProjectId(input, 'schema');
       const processedInput = await processUrlOrFile(input, projectId);
       
-      let xsd: string;
       let isTempFile = processedInput !== input;
       let actualFilePath = processedInput;
       
@@ -400,7 +400,7 @@ program
         }
         console.log('✅ Command completed successfully');
     } catch (error) {
-      console.error(`❌ Schema generation failed: ${error.message}`);
+      console.error(`❌ Schema generation failed: ${error instanceof Error ? error.message : String(error)}`);
       process.exit(1);
     }
   });
@@ -438,7 +438,7 @@ program
         }
         console.log('✅ Command completed successfully');
     } catch (error) {
-      console.error(`❌ Sample generation failed: ${error.message}`);
+      console.error(`❌ Sample generation failed: ${error instanceof Error ? error.message : String(error)}`);
       process.exit(1);
     }
   });
@@ -488,7 +488,7 @@ program
         }
         console.log('✅ Command completed successfully');
     } catch (error) {
-      console.error(`❌ XML generation failed: ${error.message}`);
+      console.error(`❌ XML generation failed: ${error instanceof Error ? error.message : String(error)}`);
       process.exit(1);
     }
   });
@@ -527,7 +527,7 @@ program
         }
         console.log('✅ Command completed successfully');
     } catch (error) {
-      console.error(`❌ Roundtrip failed: ${error.message}`);
+      console.error(`❌ Roundtrip failed: ${error instanceof Error ? error.message : String(error)}`);
       process.exit(1);
     }
   });
@@ -576,7 +576,7 @@ program
       logVerbose(`✅ Expanded XML written to ${output}`);
         console.log('✅ Command completed successfully');
     } catch (error) {
-      console.error(`❌ Expansion failed: ${error.message}`);
+      console.error(`❌ Expansion failed: ${error instanceof Error ? error.message : String(error)}`);
       process.exit(1);
     }
   });
@@ -617,7 +617,7 @@ program
         }
         console.log('✅ Command completed successfully');
     } catch (error) {
-      console.error(`❌ Realistic generation failed: ${error.message}`);
+      console.error(`❌ Realistic generation failed: ${error instanceof Error ? error.message : String(error)}`);
       process.exit(1);
     }
   });
@@ -669,7 +669,7 @@ program
           cleanupTempFile(processedXml.filePath);
         }
     } catch (error) {
-      console.error(`❌ Validation failed: ${error.message}`);
+      console.error(`❌ Validation failed: ${error instanceof Error ? error.message : String(error)}`);
       process.exit(1);
     }
   });
@@ -765,10 +765,18 @@ program
           
           console.log('\n✅ Preview completed successfully');
         } catch (error) {
-          console.error(`❌ Preview failed: ${error.message}`);
+          console.error(`❌ Preview failed: ${error instanceof Error ? error.message : String(error)}`);
           process.exit(1);
         }
   });
+
+// Configure program to exit with code 0 for help
+program.exitOverride((err) => {
+  if (err.code === 'commander.help') {
+    process.exit(0);
+  }
+  throw err;
+});
 
 // Parse command line arguments
 program.parse();

@@ -23,7 +23,7 @@ describe("FormatProcessor", () => {
     const result = await processor.processData(buffer, { projectId: "test:1.0" });
     
     expect(result.success).toBe(true);
-    expect(result.contentType).toBe("lmf");
+    expect(result.contentType).toBe("xml");
     expect(result.xmlContent).toContain("<LexicalResource");
   });
 });
@@ -35,11 +35,11 @@ describe("ContentTypeDetector", () => {
     detector = new ContentTypeDetector();
   });
 
-  it("should detect LMF XML content", () => {
+  it("should detect XML content", () => {
     const content = `<?xml version="1.0"?><LexicalResource><lexicon id="test"/></LexicalResource>`;
     const analysis = detector.detectContentType(content, "test:1.0");
     
-    expect(analysis.type).toBe("lmf");
+    expect(analysis.type).toBe("xml");
     expect(analysis.confidence).toBe("high");
     expect(analysis.indicators.hasXMLContent).toBe(true);
   });

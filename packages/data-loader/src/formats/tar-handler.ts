@@ -179,6 +179,7 @@ export class TarHandler {
                 xmlContent,
                 extractedFiles: extractedFiles.map(f => f.name),
                 lmfFile: xmlFiles[0].name,
+                xmlFiles,
                 processingTime
               });
             } else {
@@ -189,6 +190,7 @@ export class TarHandler {
                 success: false,
                 error: "XML file found but content does not appear to be LMF",
                 extractedFiles: extractedFiles.map(f => f.name),
+                xmlFiles: [],
                 processingTime
               });
             }
@@ -200,6 +202,7 @@ export class TarHandler {
               success: false,
               error: "No LMF or XML files found in tar archive",
               extractedFiles: extractedFiles.map(f => f.name),
+              xmlFiles: [],
               processingTime
             });
           }
@@ -270,6 +273,7 @@ export class TarHandler {
           success: false,
           error: error instanceof Error ? error.message : String(error),
           extractedFiles: extractedFiles.map(f => f.name),
+          xmlFiles: [],
           processingTime
         });
       });

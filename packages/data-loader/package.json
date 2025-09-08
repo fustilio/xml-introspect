@@ -1,6 +1,6 @@
 {
   "name": "@fustilio/data-loader",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "license": "MIT",
   "author": "fustilio",
   "type": "module",
@@ -23,6 +23,8 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "@types/pako": "^2.0.3",
+    "@types/tar-stream": "^3.1.4"
   }
 }

@@ -120,15 +120,8 @@ export class FormatProcessor {
       if (contentType === "tar" && options.enableTarExtraction !== false) {
         processingSteps.push("Tar archive extraction");
         
-        // Special case: OEWN packages are gzip-compressed XML, not tar archives
-        if (
-          options.projectId.startsWith("oewn:") ||
-          options.projectId.startsWith("ewn:")
-        ) {
-          contentType = "lmf";
-          confidence = "high";
-          processingSteps.push("OEWN package type override");
-        } else {
+        // Extract tar archives
+        {
           
           try {
             // For tar archives, we need to work with the original binary data
@@ -142,7 +135,7 @@ export class FormatProcessor {
               }
               
               xmlText = tarResult.xmlContent!;
-              contentType = "lmf";
+              contentType = "xml";
               confidence = "high";
               processingSteps.push(`Tar extraction completed (${tarResult.extractedFiles.length} files)`);
               
@@ -163,7 +156,7 @@ export class FormatProcessor {
               }
               
               xmlText = tarResult.xmlContent!;
-              contentType = "lmf";
+              contentType = "xml";
               confidence = "high";
               processingSteps.push(`Tar extraction from XZ binary data completed (${tarResult.extractedFiles.length} files)`);
               
@@ -184,7 +177,7 @@ export class FormatProcessor {
               }
               
               xmlText = tarResult.xmlContent!;
-              contentType = "lmf";
+              contentType = "xml";
               confidence = "high";
               processingSteps.push(`Tar extraction from gzip binary data completed (${tarResult.extractedFiles.length} files)`);
             } else {
@@ -206,20 +199,20 @@ export class FormatProcessor {
       }
 
       // Content type-specific validation
-      if (contentType === "lmf" || contentType === "xml") {
-        // Check for LMF XML content
-        if (!xmlText.includes("<LexicalResource")) {
-          throw new Error("Decompressed XML does not contain LexicalResource element - file may be corrupted");
+      if (contentType === "xml") {
+        // Check for basic XML structure
+        if (!xmlText.includes("<?xml") && !xmlText.includes("<")) {
+          throw new Error("Decompressed content does not appear to be valid XML - file may be corrupted");
         }
         
         processingSteps.push("XML validation passed");
-      } else if (contentType === "tsv" || contentType === "ili") {
-        // For TSV/ILI content, validate tab separators and structure
+      } else if (contentType === "tsv") {
+        // For TSV content, validate tab separators and structure
         if (!xmlText.includes("\t")) {
-          throw new Error("TSV/ILI content does not contain tab separators - file may be corrupted");
+          throw new Error("TSV content does not contain tab separators - file may be corrupted");
         }
         
-        processingSteps.push("TSV/ILI validation passed");
+        processingSteps.push("TSV validation passed");
       } else if (contentType === "tar") {
         // For tar content, basic validation that it's not empty
         processingSteps.push("Tar validation passed");
