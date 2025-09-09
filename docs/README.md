@@ -15,12 +15,11 @@ Welcome to XML Introspect - a powerful tool for analyzing, processing, and gener
 
 ### 🎯 Examples & Tutorials
 - **[Examples](examples/)** - Real-world usage examples and tutorials
-- **[Advanced Usage](examples/advanced/)** - Complex scenarios and best practices
 
 ### 🔧 Technical Documentation
-- **[Architecture](technical/architecture.md)** - System design and components
+- **[Architecture Overview](technical/architecture.md)** - Complete system architecture and module structure
+- **[Technical Overview](technical/)** - System components and utilities
 - **[UNIST Utilities](technical/unist-utilities.md)** - XML tree processing utilities
-- **[Plugin System](technical/plugin-system.md)** - Extending XML Introspect
 
 ## 🎯 Quick Start
 

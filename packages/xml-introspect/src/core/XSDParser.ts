@@ -14,20 +14,17 @@ import {
   XSDBaseNode,
   XASTElement
 } from './types';
-import { readFileSync } from 'fs';
 import { fromXml } from 'xast-util-from-xml';
 import { visit, SKIP } from 'unist-util-visit';
 
-export class XSDParser {
-  private xsdXAST: XSDAST | null = null;
+export abstract class XSDParser {
+  protected xsdXAST: XSDAST | null = null;
 
   /**
    * Parse an XSD file into a unified XAST structure
+   * This method should be implemented by environment-specific subclasses
    */
-  async parseXSDFile(filePath: string): Promise<XSDAST> {
-    const content = readFileSync(filePath, 'utf8');
-    return this.parseXSDContent(content);
-  }
+  abstract parseXSDFile(filePath: string): Promise<XSDAST>;
 
   /**
    * Parse XSD content string into a unified XAST structure

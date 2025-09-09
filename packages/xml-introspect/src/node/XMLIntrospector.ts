@@ -13,14 +13,14 @@ if (typeof globalThis.Worker === 'undefined') {
   }
 }
 import { fromXml } from 'xast-util-from-xml';
-import { toXmlPretty as toXml } from './xast-util-to-xml-pretty.js';
+import { toXmlPretty as toXml } from '../core/xast-util-to-xml-pretty.js';
 import { visit } from 'unist-util-visit';
 import { filter } from 'unist-util-filter';
 import { find } from 'unist-util-find';
 import { map } from 'unist-util-map';
 import { size } from 'unist-util-size';
 import { parents } from 'unist-util-parents';
-import { XMLFakerGenerator, XMLFakerOptions } from './XMLFakerGenerator.js';
+import { XMLFakerGenerator, XMLFakerOptions } from '../core/XMLFakerGenerator.js';
 import { 
   SamplingOptions, 
   XSDAST,
@@ -45,8 +45,8 @@ import {
   XSDASTComparison,
   XSDElement,
   XSDAttribute
-} from './types.js';
-import { XSDParser } from './XSDParser.js';
+} from '../core/types.js';
+import { XSDParser } from '../core/XSDParser.js';
 import { StreamingXMLIntrospector } from './StreamingXMLIntrospector.js';
 
 const LARGE_FILE_THRESHOLD_BYTES = 10 * 1024 * 1024; // 10MB
@@ -227,7 +227,7 @@ export class XMLIntrospector {
             for (const [key, value] of Object.entries(xastElement.attributes)) {
               if (key.startsWith('xmlns') && key !== 'xmlns') {
                 // Only add prefixed namespaces, not the default xmlns
-                namespaces.set(key, value);
+                namespaces.set(key, String(value));
               }
             }
           }
@@ -647,7 +647,7 @@ export class XMLIntrospector {
     const maxElements = options.maxElements || 100;
     let elementCount = 0;
 
-    for (const [elementName, typeInfo] of Array.from(structure.elementTypes.entries())) {
+    for (const [elementName, typeInfo] of Array.from((structure.elementTypes as Map<string, any>).entries())) {
       if (elementCount >= maxElements) break;
       
       const count = Math.min(3, Math.ceil(maxElements / structure.elementTypes.size));
@@ -684,7 +684,7 @@ export class XMLIntrospector {
   private identifyPatternsAndRules(structure: XMLStructure): PatternRule[] {
     const rules: PatternRule[] = [];
 
-    for (const [elementName, typeInfo] of Array.from(structure.elementTypes.entries())) {
+    for (const [elementName, typeInfo] of Array.from((structure.elementTypes as Map<string, any>).entries())) {
       const rule: PatternRule = {
         elementName,
         attributes: Array.from(typeInfo.attributes),
@@ -935,7 +935,7 @@ export class XMLIntrospector {
     xsd += ` elementFormDefault="${elementForm}" attributeFormDefault="${attributeForm}"`;
     
     // Add namespace attributes if present
-    for (const [key, value] of Array.from(structure.namespaces.entries())) {
+    for (const [key, value] of Array.from((structure.namespaces as Map<string, string>).entries())) {
       if (key.startsWith('xmlns:')) {
         const prefix = key.split(':')[1];
         xsd += ` xmlns:${prefix}="${value}"`;
@@ -980,7 +980,7 @@ export class XMLIntrospector {
     }
     
     // Add namespace attribute declarations for prefixed namespaces
-    for (const [key, value] of Array.from(structure.namespaces.entries())) {
+    for (const [key, value] of Array.from((structure.namespaces as Map<string, string>).entries())) {
       if (key.startsWith('xmlns:')) {
         const prefix = key.split(':')[1];
         xsd += `\n  <xs:attribute name="${prefix}:type" type="xs:string"/>\n`;
@@ -1484,7 +1484,7 @@ export class XMLIntrospector {
     xml += `<${structure.rootElement}`;
     
     // Add namespace attributes if present
-    for (const [key, value] of Array.from(structure.namespaces.entries())) {
+    for (const [key, value] of Array.from((structure.namespaces as Map<string, string>).entries())) {
       xml += ` ${key}="${value}"`;
     }
     xml += '>\n';

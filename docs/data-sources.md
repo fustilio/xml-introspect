@@ -79,34 +79,16 @@ console.log('Confidence:', analysis.confidence); // 'high', 'medium', 'low'
 
 ## Performance
 
-### Large File Handling
-
 - **Memory Efficient**: Streams files of any size
 - **Processing Speed**: ~50MB/s for gzip, ~20MB/s for xz
-- **Scalable**: Successfully processes files with millions of elements
-
-### Optimization Tips
-
-- Use `--max-elements` to limit processing time
-- Use `--max-depth` to control memory usage
-- Process compressed files directly
-- Use `--seed` for reproducible results
+- **Scalable**: Handles files with millions of elements
 
 ## Troubleshooting
 
-### Common Issues
-
-**Network timeouts:**
 ```bash
-export XML_INTROSPECT_TIMEOUT=300000  # 5 minutes
-```
+# Network timeouts
+export XML_INTROSPECT_TIMEOUT=300000
 
-**Memory issues:**
-```bash
+# Memory issues
 xml-introspect sample large.xml output.xml --max-elements 50 --max-depth 3
 ```
-
-**Format detection:**
-- Check content type indicators
-- Verify project ID configuration
-- Review detection confidence levels

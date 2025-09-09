@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach, afterAll } from 'vitest';
 import { writeFileSync, unlinkSync, existsSync, mkdirSync, rmSync } from 'fs';
 import { join } from 'path';
-import { XSDParser } from '../../src/XSDParser';
+import { NodeXSDParser } from '../../../src/node/NodeXSDParser';
+import type { XSDParser } from '../../../src/core/XSDParser';
 
 describe('XSD Parser and Unified XAST', () => {
   let parser: XSDParser;
@@ -9,7 +10,7 @@ describe('XSD Parser and Unified XAST', () => {
   let testFiles: string[] = [];
 
   beforeEach(() => {
-    parser = new XSDParser();
+    parser = new NodeXSDParser();
     tempDir = join(process.cwd(), '.temp', 'xsd-tests');
     
     // Create temp directory if it doesn't exist

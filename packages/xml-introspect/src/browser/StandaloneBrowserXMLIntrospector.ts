@@ -1,9 +1,13 @@
 /**
  * Standalone Browser-compatible XML Introspector
  * 
- * This is a completely standalone, browser-compatible version that doesn't import
- * from any other modules in the xml-introspect package to avoid Node.js dependencies.
+ * This version uses the same parsing logic as the node version for consistency.
  */
+
+import { fromXml } from 'xast-util-from-xml';
+import type { XASTElement, XASTText } from 'xast';
+
+// xmllint-wasm will be imported dynamically in validation method
 
 // Standalone types for browser compatibility
 export interface StandaloneXMLStructure {
@@ -37,12 +41,13 @@ export interface StandaloneContentAnalysis {
 
 export class StandaloneBrowserXMLIntrospector {
   /**
-   * Analyze XML content structure using a simple XML parser
+   * Analyze XML content structure using XAST parsing (same as node version)
    */
   async analyzeContent(xmlContent: string): Promise<StandaloneXMLStructure> {
     try {
-      // Use a simple XML parser approach
-      const structure = this.parseXMLStructure(xmlContent);
+      // Use the same XAST parsing approach as the node version
+      const xast = fromXml(xmlContent);
+      const structure = this.parseXASTStructure(xast);
       return structure;
     } catch (error) {
       console.warn('Failed to analyze XML content:', error);
@@ -84,21 +89,57 @@ export class StandaloneBrowserXMLIntrospector {
   }
 
   /**
-   * Validate XML content (basic validation)
+   * Validate XML content (try xmllint-wasm first, fallback to basic validation)
    */
   async validateContent(xmlContent: string): Promise<StandaloneValidationResult> {
     try {
-      // Basic XML validation by checking for well-formedness
-      const isValid = this.isWellFormedXML(xmlContent);
+      // Try to use xmllint-wasm for comprehensive validation
+      try {
+        const { validateXML } = await import('xmllint-wasm');
+        const result = await validateXML({
+          xml: [{
+            fileName: 'input.xml',
+            contents: xmlContent,
+          }],
+          schema: [],
+          initialMemoryPages: 256,
+          maxMemoryPages: 1024,
+        });
+        
+        return {
+          valid: result.valid,
+          errors: Array.from(result.errors),
+          warnings: (result as any).warnings ? Array.from((result as any).warnings) : []
+        };
+      } catch (wasmError) {
+        // If WASM fails, fall back to basic validation
+        return this.performBasicValidation(xmlContent);
+      }
+    } catch (error) {
       return {
-        valid: isValid,
-        errors: isValid ? [] : ['Invalid XML structure'],
+        valid: false,
+        errors: [error instanceof Error ? error.message : 'Invalid XML'],
+        warnings: []
+      };
+    }
+  }
+
+  /**
+   * Perform basic XML validation without WASM
+   */
+  private performBasicValidation(xmlContent: string): StandaloneValidationResult {
+    try {
+      // Try to parse with XAST - if it succeeds, XML is well-formed
+      fromXml(xmlContent);
+      return {
+        valid: true,
+        errors: [],
         warnings: []
       };
     } catch (error) {
       return {
         valid: false,
-        errors: [error instanceof Error ? error.message : 'Invalid XML'],
+        errors: [error instanceof Error ? error.message : 'Invalid XML structure'],
         warnings: []
       };
     }
@@ -120,9 +161,9 @@ export class StandaloneBrowserXMLIntrospector {
   }
 
   /**
-   * Simple XML structure parser
+   * Parse XAST structure (same logic as node version)
    */
-  private parseXMLStructure(xmlContent: string): StandaloneXMLStructure {
+  private parseXASTStructure(xast: any): StandaloneXMLStructure {
     const elementCounts: Record<string, number> = {};
     const attributeCounts: Record<string, number> = {};
     const rootElements: string[] = [];
@@ -131,60 +172,46 @@ export class StandaloneBrowserXMLIntrospector {
     let maxDepth = 0;
     let totalElements = 0;
 
-    // Simple regex-based XML parsing
-    const elementRegex = /<(\w+)(?:\s+([^>]*))?>/g;
-    const selfClosingRegex = /<(\w+)(?:\s+([^>]*))?\/>/g;
-    let match;
-    let depth = 0;
-
-    // Parse regular elements
-    while ((match = elementRegex.exec(xmlContent)) !== null) {
-      const elementName = match[1];
-      const attributesStr = match[2] || '';
-      
-      totalElements++;
-      elementCounts[elementName] = (elementCounts[elementName] || 0) + 1;
-      
-      if (depth === 0) {
-        rootElements.push(elementName);
+    // Use the same traversal logic as the node version
+    const traverseNode = (node: any, depth: number = 0): void => {
+      // Safety check to prevent infinite recursion
+      if (depth > 1000 || totalElements > 100000) {
+        console.warn(`Safety limit reached: depth=${depth}, elements=${totalElements}`);
+        return;
       }
 
-      // Parse attributes
-      if (attributesStr) {
-        const attrRegex = /(\w+)=["']([^"']*)["']/g;
-        let attrMatch;
-        while ((attrMatch = attrRegex.exec(attributesStr)) !== null) {
-          const attrName = attrMatch[1];
-          attributeCounts[attrName] = (attributeCounts[attrName] || 0) + 1;
+      if (node.type === 'element' && node.name) {
+        const xastElement = node as XASTElement;
+        const tagName = xastElement.name.includes(':') ? xastElement.name.split(':')[1] : xastElement.name;
+        
+        totalElements++;
+        maxDepth = Math.max(maxDepth, depth + 1); // Convert to 1-based depth for test expectations
+        
+        if (depth === 0) {
+          rootElements.push(tagName);
+        }
+
+        // Count element
+        elementCounts[tagName] = (elementCounts[tagName] || 0) + 1;
+
+        // Count attributes
+        if (xastElement.attributes) {
+          for (const [attrName, attrValue] of Object.entries(xastElement.attributes)) {
+            attributeCounts[attrName] = (attributeCounts[attrName] || 0) + 1;
+          }
+        }
+
+        // Traverse children
+        if (xastElement.children) {
+          for (const child of xastElement.children) {
+            traverseNode(child, depth + 1);
+          }
         }
       }
+    };
 
-      depth++;
-      maxDepth = Math.max(maxDepth, depth);
-    }
-
-    // Parse self-closing elements
-    while ((match = selfClosingRegex.exec(xmlContent)) !== null) {
-      const elementName = match[1];
-      const attributesStr = match[2] || '';
-      
-      totalElements++;
-      elementCounts[elementName] = (elementCounts[elementName] || 0) + 1;
-      
-      if (depth === 0) {
-        rootElements.push(elementName);
-      }
-
-      // Parse attributes
-      if (attributesStr) {
-        const attrRegex = /(\w+)=["']([^"']*)["']/g;
-        let attrMatch;
-        while ((attrMatch = attrRegex.exec(attributesStr)) !== null) {
-          const attrName = attrMatch[1];
-          attributeCounts[attrName] = (attributeCounts[attrName] || 0) + 1;
-        }
-      }
-    }
+    // Start traversal from root
+    traverseNode(xast);
 
     // Sort and limit common elements
     Object.entries(elementCounts)
@@ -213,33 +240,6 @@ export class StandaloneBrowserXMLIntrospector {
     };
   }
 
-  /**
-   * Basic XML well-formedness check
-   */
-  private isWellFormedXML(xmlContent: string): boolean {
-    try {
-      // Basic checks for XML structure
-      const trimmed = xmlContent.trim();
-      
-      // Must start with < and end with >
-      if (!trimmed.startsWith('<') || !trimmed.endsWith('>')) {
-        return false;
-      }
-
-      // Check for balanced tags (simplified)
-      const openTags = trimmed.match(/<[^\/][^>]*>/g) || [];
-      const closeTags = trimmed.match(/<\/[^>]*>/g) || [];
-      const selfClosingTags = trimmed.match(/<[^>]*\/>/g) || [];
-
-      // Basic balance check
-      const totalOpenTags = openTags.length + selfClosingTags.length;
-      const totalCloseTags = closeTags.length + selfClosingTags.length;
-
-      return totalOpenTags >= totalCloseTags;
-    } catch (error) {
-      return false;
-    }
-  }
 
   /**
    * Create empty structure for error cases

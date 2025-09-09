@@ -1,9 +1,22 @@
 {
   "name": "xml-introspect",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "license": "MIT",
   "author": "fustilio",
   "type": "module",
+  "description": "Analyze large XML files and generate representative samples with identical structure.",
+  "keywords": [
+    "xml",
+    "xsd",
+    "introspect",
+    "analysis",
+    "sampling",
+    "wordnet",
+    "lmf",
+    "cli",
+    "typescript",
+    "data-processing"
+  ],
   "scripts": {
     "test": "pnpm test:node && pnpm test:browser && pnpm test:cli",
     "test:node": "vitest run --config vitest.node.config.ts --reporter=verbose",
@@ -20,15 +33,17 @@
     "test:ui": "vitest --ui",
     "test:schema": "vitest run test/schema-consistency.test.ts --reporter=verbose",
     "bench": "vitest bench --run bench/xml-introspect.bench.ts",
-    "build": "rimraf dist && pnpm build:node && pnpm build:browser",
+    "build": "rimraf dist && pnpm build:node && pnpm build:browser && pnpm build:cdn",
     "build:node": "vite build",
     "build:browser": "vite build --config vite.browser.config.ts",
+    "build:cdn": "vite build --config vite.cdn.config.ts",
     "dev": "vite build --watch",
     "cli": "node dist/cli.js",
     "demo:faker": "node scripts/faker-demo.js",
     "demo:schema": "node scripts/schema-consistency-demo.js",
+    "demo:cdn": "pnpm build:cdn && echo 'CDN demo available at: http://localhost:8080/examples/cdn-usage.html' && python -m http.server 8080 --directory . --bind 127.0.0.1",
     "test:cli:one": "pnpm cli schema ./data/input/omw-fr.xml ./data/output/test.xsd",
-    "test:cli:two": "tsx src/cli.ts schema ./data/input/omw-fr.xml ./data/output/test.xsd"
+    "test:cli:two": "tsx src/cli/index.ts schema ./data/input/omw-fr.xml ./data/output/test.xsd"
   },
   "exports": {
     ".": {
@@ -36,7 +51,13 @@
     },
     "./browser": {
       "default": "./dist/browser.js"
-    }
+    },
+    "./cdn": {
+      "umd": "./dist/xml-introspect.umd.js",
+      "iife": "./dist/xml-introspect.iife.js",
+      "default": "./dist/xml-introspect.umd.js"
+    },
+    "./index.js": "./dist/xml-introspect.umd.js"
   },
   "dependencies": {
     "@faker-js/faker": "^9.9.0",
@@ -77,6 +98,7 @@
   "files": [
     "dist/",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "index.js"
   ]
 }

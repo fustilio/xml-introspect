@@ -56,12 +56,13 @@ xml-introspect sample https://example.com/data.xml.gz output.xml
 
 ## Library Usage
 
-### Basic XML Processing
+### Node.js Usage
 
 ```typescript
-import { XMLIntrospector } from 'xml-introspect';
+import { XMLIntrospector, NodeXSDParser } from 'xml-introspect';
 
 const introspector = new XMLIntrospector();
+const xsdParser = new NodeXSDParser();
 
 // Generate sample from large XML
 await introspector.generateSample('input.xml', 'output.xml', {
@@ -74,6 +75,57 @@ await introspector.generateSample('input.xml', 'output.xml', {
 await introspector.generateSchema('data.xml', 'schema.xsd', {
   namespace: 'http://example.com/schema'
 });
+
+// Parse XSD file
+const xsdAST = await xsdParser.parseXSDFile('schema.xsd');
+```
+
+### Browser Usage
+
+```typescript
+import { BrowserXMLIntrospector, BrowserXSDParser } from 'xml-introspect/browser';
+
+const introspector = new BrowserXMLIntrospector();
+const xsdParser = new BrowserXSDParser();
+
+// Analyze XML content
+const analysis = await introspector.analyzeContent(xmlContent);
+
+// Analyze XSD content
+const xsdAnalysis = await introspector.analyzeXSDContent(xsdContent);
+
+// Generate sample XML
+const sampleXML = introspector.generateSampleXML(100);
+```
+
+### CDN Usage
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>XML Introspect CDN Example</title>
+</head>
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/xml-introspect@latest/dist/xml-introspect.umd.js"></script>
+    <script>
+        // Using the global XMLIntrospect object
+        const xmlContent = '<?xml version="1.0"?><root><item>test</item></root>';
+        
+        // Analyze XML
+        const analysis = await XMLIntrospect.analyzeXML(xmlContent);
+        console.log(analysis);
+        
+        // Preview content
+        const preview = XMLIntrospect.previewXML(xmlContent, 10);
+        console.log(preview);
+        
+        // Validate XML
+        const validation = await XMLIntrospect.validateXML(xmlContent);
+        console.log(validation);
+    </script>
+</body>
+</html>
 ```
 
 ### Realistic Data Generation

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { XMLIntrospector } from '../../src/XMLIntrospector';
+import { XMLIntrospector } from '../../../src/node/XMLIntrospector';
 import { writeFileSync, unlinkSync, existsSync, mkdirSync, rmSync, readFileSync } from 'fs';
 import { join } from 'path';
 

@@ -138,51 +138,25 @@ xml-introspect validate sample.xml schema.xsd
 
 ## Error Handling
 
-The CLI provides detailed error messages and exit codes:
-
-- `0` - Success
-- `1` - General error
-- `2` - Invalid arguments
-- `3` - File not found
-- `4` - Processing error
-- `5` - Validation error
+Exit codes: `0` (success), `1` (general error), `2` (invalid arguments), `3` (file not found), `4` (processing error), `5` (validation error)
 
 ## Performance Tips
 
-- Use `--max-elements` to limit processing time for very large files
-- Use `--max-depth` to control memory usage
-- Process compressed files directly (gzip, xz support)
-- Use `--seed` for reproducible results in testing
+- Use `--max-elements` and `--max-depth` for large files
+- Process compressed files directly
+- Use `--seed` for reproducible results
 
 ## Troubleshooting
 
-### Common Issues
-
-**File not found:**
 ```bash
-# Check file path and permissions
-ls -la input.xml
-```
-
-**Memory issues with large files:**
-```bash
-# Reduce max-elements and max-depth
-xml-introspect sample large.xml output.xml --max-elements 50 --max-depth 3
-```
-
-**Network timeouts:**
-```bash
-# Set timeout environment variable
-export XML_INTROSPECT_TIMEOUT=300000  # 5 minutes
-xml-introspect sample https://example.com/large.xml output.xml
-```
-
-### Debug Mode
-
-Enable verbose output for debugging:
-
-```bash
+# Debug mode
 xml-introspect sample input.xml output.xml --verbose
+
+# Memory optimization
+xml-introspect sample large.xml output.xml --max-elements 50 --max-depth 3
+
+# Network timeout
+export XML_INTROSPECT_TIMEOUT=300000
 ```
 
 ## See Also

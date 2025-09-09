@@ -3,11 +3,11 @@ import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
 import { tmpdir } from "os";
 import { existsSync } from "fs";
-import { XMLIntrospector } from "../src/XMLIntrospector";
-import { XSDParser } from "../src/XSDParser";
-import { StreamingXMLIntrospector } from "../src/StreamingXMLIntrospector";
-import { XMLStructure } from "../src/types";
-import { XMLFakerGenerator } from "../src/XMLFakerGenerator";
+import { XMLIntrospector } from "../src/node/XMLIntrospector";
+import { NodeXSDParser } from "../src/node/NodeXSDParser";
+import { StreamingXMLIntrospector } from "../src/node/StreamingXMLIntrospector";
+import { XMLStructure } from "../src/core/types";
+import { XMLFakerGenerator } from "../src/core/XMLFakerGenerator";
 
 const LIMITED_TIME = {
   iterations: 1,
@@ -126,7 +126,7 @@ describe("XML Introspect Performance Benchmark", () => {
       describe("XSD Parsing", () => {
         bench("Current Implementation", async () => {
           const introspector = new XMLIntrospector();
-          const xsdParser = new XSDParser();
+          const xsdParser = new NodeXSDParser();
           const filePath = await getOrCreateTestFile(slug, numElements, depth);
           const xsd = await introspector.generateXSDFromXML(filePath, {
             targetNamespace: "http://example.com/schema",
@@ -142,7 +142,7 @@ describe("XML Introspect Performance Benchmark", () => {
 
         bench("Streaming Implementation", async () => {
           const introspector = new StreamingXMLIntrospector();
-          const xsdParser = new XSDParser();
+          const xsdParser = new NodeXSDParser();
           const filePath = await getOrCreateTestFile(slug, numElements, depth);
           const xsd = await introspector.generateXSDFromXML(filePath, {
             targetNamespace: "http://example.com/schema",
@@ -214,7 +214,7 @@ describe("XML Introspect Performance Benchmark", () => {
     describe("WordNet LMF Workflow", () => {
       bench("mini-lmf-1.4.xml - Full Workflow", async () => {
         const introspector = new XMLIntrospector();
-        const xsdParser = new XSDParser();
+        const xsdParser = new NodeXSDParser();
 
         // Create a minimal WordNet LMF file for benchmarking
         const wordnetXML = `<?xml version="1.0" encoding="UTF-8"?>

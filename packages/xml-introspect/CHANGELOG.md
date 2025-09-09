@@ -1,5 +1,16 @@
 # xml-introspect
 
+## 0.4.0
+
+### Minor Changes
+
+- restructure core, node, browser, cli, cdn organization
+
+### Patch Changes
+
+- Updated dependencies
+  - @fustilio/data-loader@0.4.0
+
 ## 0.3.2
 
 ### Patch Changes

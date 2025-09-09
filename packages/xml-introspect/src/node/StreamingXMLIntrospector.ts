@@ -1,6 +1,6 @@
 import { createReadStream } from 'fs';
 import sax from 'sax';
-import { XMLStructure, XMLElement, XASTNode, ElementTypeInfo, XASTElement, XASTText } from './types.js';
+import { XMLStructure, XMLElement, XASTNode, ElementTypeInfo, XASTElement, XASTText } from '../core/types.js';
 
 /**
  * Streaming XML Introspector for memory-efficient processing of large XML files

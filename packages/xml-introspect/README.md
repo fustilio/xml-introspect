@@ -13,10 +13,13 @@ npm install xml-introspect
 
 ## Quick Start
 
+### Node.js
+
 ```typescript
-import { XMLIntrospector } from 'xml-introspect';
+import { XMLIntrospector, NodeXSDParser } from 'xml-introspect';
 
 const introspector = new XMLIntrospector();
+const xsdParser = new NodeXSDParser();
 
 await introspector.generateSample('input.xml', 'sample.xml', {
   maxElements: 100,
@@ -24,6 +27,34 @@ await introspector.generateSample('input.xml', 'sample.xml', {
 });
 
 await introspector.generateSchema('input.xml', 'schema.xsd');
+
+// Parse XSD file
+const xsdAST = await xsdParser.parseXSDFile('schema.xsd');
+```
+
+### Browser
+
+```typescript
+import { BrowserXMLIntrospector, BrowserXSDParser } from 'xml-introspect/browser';
+
+const introspector = new BrowserXMLIntrospector();
+const xsdParser = new BrowserXSDParser();
+
+// Analyze XML content
+const analysis = await introspector.analyzeContent(xmlContent);
+
+// Analyze XSD content
+const xsdAnalysis = await introspector.analyzeXSDContent(xsdContent);
+```
+
+### CDN
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/xml-introspect@latest/dist/xml-introspect.umd.js"></script>
+<script>
+  const analysis = await XMLIntrospect.analyzeXML(xmlContent);
+  const preview = XMLIntrospect.previewXML(xmlContent, 10);
+</script>
 ```
 
 ## CLI Usage
@@ -36,8 +67,15 @@ xml-introspect sample https://en-word.net/static/english-wordnet-2024.xml.gz sam
 
 ## API
 
+### Node.js API
+
 **Core Methods:**
 ```typescript
+import { XMLIntrospector, NodeXSDParser } from 'xml-introspect';
+
+const introspector = new XMLIntrospector();
+const xsdParser = new NodeXSDParser();
+
 // Analyze structure
 const analysis = await introspector.analyzeStructure('input.xml');
 
@@ -56,11 +94,41 @@ await introspector.generateSchema('input.xml', 'schema.xsd', {
 // Validate XML
 const isValid = await introspector.validateXML('data.xml', 'schema.xsd');
 
-// Generate realistic data
-await introspector.generateRealisticXML('template.xml', 'realistic.xml', {
-  seed: 42,
-  maxElements: 200
-});
+// Parse XSD file
+const xsdAST = await xsdParser.parseXSDFile('schema.xsd');
+```
+
+### Browser API
+
+**Browser Methods:**
+```typescript
+import { BrowserXMLIntrospector, BrowserXSDParser } from 'xml-introspect/browser';
+
+const introspector = new BrowserXMLIntrospector();
+const xsdParser = new BrowserXSDParser();
+
+// Analyze XML content
+const analysis = await introspector.analyzeContent(xmlContent);
+
+// Analyze XSD content
+const xsdAnalysis = await introspector.analyzeXSDContent(xsdContent);
+
+// Generate sample XML
+const sampleXML = introspector.generateSampleXML(100);
+
+// Generate XML from XSD
+const generatedXML = introspector.generateXMLFromXSD(xsdContent);
+```
+
+### CDN API
+
+**Global Methods:**
+```javascript
+// Available on window.XMLIntrospect
+const analysis = await XMLIntrospect.analyzeXML(xmlContent);
+const preview = XMLIntrospect.previewXML(xmlContent, 10);
+const validation = await XMLIntrospect.validateXML(xmlContent);
+const xsdAnalysis = await XMLIntrospect.analyzeXSD(xsdContent);
 ```
 
 **Data Processing:**

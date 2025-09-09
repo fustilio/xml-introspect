@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { XMLIntrospector } from './XMLIntrospector.js';
-import { StreamingXMLIntrospector } from './StreamingXMLIntrospector.js';
-import { XMLFakerGenerator, XMLFakerOptions } from './XMLFakerGenerator.js';
+import { XMLIntrospector } from '../node/XMLIntrospector.js';
+import { StreamingXMLIntrospector } from '../node/StreamingXMLIntrospector.js';
+import { XMLFakerGenerator, XMLFakerOptions } from '../core/XMLFakerGenerator.js';
 import { FormatProcessor } from '@xml-introspect/data-loader';
 import { readFileSync, writeFileSync, unlinkSync, statSync } from 'fs';
 import inquirer from 'inquirer';

@@ -2,42 +2,108 @@
 
 Complete TypeScript/JavaScript API documentation for XML Introspect.
 
-## Browser Usage (CDN)
+## Architecture Overview
 
-XML Introspect can be used directly in the browser via CDN. Use the browser-compatible version:
+XML Introspect is organized into environment-specific modules:
+
+- **`core`** - Shared functionality and abstract classes
+- **`node`** - Node.js-specific implementations with file system access
+- **`browser`** - Browser-specific implementations with CDN support
+- **`cli`** - Command-line interface tools
+
+## Environment-Specific Usage
+
+### Node.js Usage
+
+```typescript
+import { XMLIntrospector, NodeXSDParser } from 'xml-introspect';
+
+const introspector = new XMLIntrospector();
+const xsdParser = new NodeXSDParser();
+
+// File system operations available
+await introspector.generateSample('input.xml', 'output.xml');
+await xsdParser.parseXSDFile('schema.xsd');
+```
+
+### Browser Usage (CDN)
+
+XML Introspect can be used directly in the browser via CDN:
 
 ```html
-<script type="module">
-  import { StandaloneBrowserXMLIntrospector } from 'https://cdn.observableusercontent.com/npm/xml-introspect@0.3.1/browser.js';
-  
-  const introspector = new StandaloneBrowserXMLIntrospector();
-  
-  // Analyze XML content
-  const analysis = await introspector.analyzeContentStructure(xmlContent);
-  console.log(analysis);
+<script src="https://cdn.jsdelivr.net/npm/xml-introspect@latest/dist/xml-introspect.umd.js"></script>
+<script>
+  // Using the global XMLIntrospect object
+  const result = await XMLIntrospect.analyzeXML(xmlContent);
+  const preview = XMLIntrospect.previewXML(xmlContent, 10);
+  const validation = await XMLIntrospect.validateXML(xmlContent);
 </script>
 ```
 
-### Browser API
-
-The browser version provides a simplified API optimized for client-side usage:
+### Browser Usage (ES Modules)
 
 ```typescript
-import { StandaloneBrowserXMLIntrospector } from 'https://cdn.observableusercontent.com/npm/xml-introspect@0.3.1/browser.js';
+import { BrowserXMLIntrospector, BrowserXSDParser } from 'xml-introspect/browser';
 
-const introspector = new StandaloneBrowserXMLIntrospector();
+const introspector = new BrowserXMLIntrospector();
+const xsdParser = new BrowserXSDParser();
 
-// Analyze XML structure
-const structure = await introspector.analyzeContent(xmlContent);
+// Content-based operations (no file system access)
+const analysis = await introspector.analyzeContent(xmlContent);
+const xsdAnalysis = await introspector.analyzeXSDContent(xsdContent);
+```
 
-// Get content preview
-const preview = introspector.getContentPreview(xmlContent, 100);
+## XSDParser Classes
 
-// Validate XML
-const validation = await introspector.validateContent(xmlContent);
+### Core XSDParser (Abstract)
 
-// Comprehensive analysis
-const analysis = await introspector.analyzeContentStructure(xmlContent);
+Base abstract class for XSD parsing functionality.
+
+```typescript
+import { XSDParser } from 'xml-introspect/core';
+
+// Abstract class - use environment-specific implementations
+```
+
+### NodeXSDParser
+
+Node.js implementation with file system access.
+
+```typescript
+import { NodeXSDParser } from 'xml-introspect/node';
+
+const parser = new NodeXSDParser();
+
+// Parse XSD file from file system
+const xsdAST = await parser.parseXSDFile('schema.xsd');
+
+// Parse XSD content directly
+const xsdAST = parser.parseXSDContent(xsdContent);
+
+// Get element names
+const elementNames = parser.getElementNames();
+
+// Get structure summary
+const summary = parser.getStructureSummary();
+```
+
+### BrowserXSDParser
+
+Browser implementation for content-based parsing.
+
+```typescript
+import { BrowserXSDParser } from 'xml-introspect/browser';
+
+const parser = new BrowserXSDParser();
+
+// Parse XSD content (file system not available in browser)
+const xsdAST = parser.parseXSDContent(xsdContent);
+
+// Get element names
+const elementNames = parser.getElementNames();
+
+// Get structure summary
+const summary = parser.getStructureSummary();
 ```
 
 ## XMLIntrospector
@@ -99,6 +165,74 @@ await introspector.generateRealisticXML('template.xml', 'realistic.xml', {
   seed: 42,
   maxElements: 200
 });
+```
+
+## BrowserXMLIntrospector
+
+Browser-specific XML introspector with CDN support.
+
+```typescript
+import { BrowserXMLIntrospector } from 'xml-introspect/browser';
+
+const introspector = new BrowserXMLIntrospector();
+```
+
+### Methods
+
+#### `analyzeContent(xmlContent)`
+
+Analyze XML content structure.
+
+```typescript
+const analysis = await introspector.analyzeContent(xmlContent);
+```
+
+#### `analyzeContentStructure(xmlContent)`
+
+Comprehensive analysis including structure, preview, and validation.
+
+```typescript
+const analysis = await introspector.analyzeContentStructure(xmlContent);
+```
+
+#### `getContentPreview(xmlContent, lines?)`
+
+Get content preview with specified number of lines.
+
+```typescript
+const preview = introspector.getContentPreview(xmlContent, 10);
+```
+
+#### `validateContent(xmlContent)`
+
+Validate XML content.
+
+```typescript
+const validation = await introspector.validateContent(xmlContent);
+```
+
+#### `analyzeXSDContent(xsdContent)`
+
+Analyze XSD content structure.
+
+```typescript
+const xsdAnalysis = await introspector.analyzeXSDContent(xsdContent);
+```
+
+#### `generateSampleXML(elementCount)`
+
+Generate sample XML with specified element count.
+
+```typescript
+const sampleXML = introspector.generateSampleXML(100);
+```
+
+#### `generateXMLFromXSD(xsdContent)`
+
+Generate XML from XSD content.
+
+```typescript
+const generatedXML = introspector.generateXMLFromXSD(xsdContent);
 ```
 
 ## XMLFakerGenerator

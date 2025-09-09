@@ -4,9 +4,18 @@ Technical details for XML Introspect.
 
 ## Architecture
 
-XML Introspect uses a modular architecture:
+XML Introspect uses a modular, environment-specific architecture:
+
+- **[Architecture Overview](architecture.md)** - Complete system architecture documentation
+- **Core Module** - Shared functionality and abstract classes
+- **Node.js Module** - Node.js-specific implementations with file system access
+- **Browser Module** - Browser-specific implementations with CDN support
+- **CLI Module** - Command-line interface tools
+
+### Key Components
 
 - **XMLIntrospector** - Main processing engine
+- **XSDParser** - Environment-specific XSD parsing (abstract base class)
 - **FormatProcessor** - Data loading and format handling
 - **ContentTypeDetector** - Format detection
 - **XMLFakerGenerator** - Realistic data generation

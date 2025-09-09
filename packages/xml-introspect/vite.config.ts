@@ -13,7 +13,7 @@ export default createViteConfig({
     lib: {
       entry: {
         index: 'src/index.ts',
-        cli: 'src/cli.ts'
+        cli: 'src/cli/index.ts'
       },
       formats: ['es'],
       fileName: (format, entryName) => `${entryName}.js`

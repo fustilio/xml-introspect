@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import { StandaloneBrowserXMLIntrospector } from '../../dist/browser.js';
+import { BrowserXMLIntrospector } from '../../dist/browser.js';
 
-describe('Standalone Browser XML Introspector', () => {
-  const introspector = new StandaloneBrowserXMLIntrospector();
+describe('Browser XML Introspector', () => {
+  const introspector = new BrowserXMLIntrospector();
 
   it('should analyze simple XML structure', async () => {
     const xmlContent = `

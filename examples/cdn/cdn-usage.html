@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XML Introspect CDN Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #005a9e;
+        }
+        .result {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .error {
+            background: #ffe6e6;
+            color: #d00;
+        }
+        .success {
+            background: #e6ffe6;
+            color: #060;
+        }
+    </style>
+</head>
+<body>
+    <h1>XML Introspect CDN Example</h1>
+    <p>This example demonstrates how to use XML Introspect via CDN.</p>
+    
+    <div class="container">
+        <div>
+            <h3>Input XML</h3>
+            <textarea id="xmlInput" placeholder="Paste your XML content here...">
+<?xml version="1.0" encoding="UTF-8"?>
+<library>
+    <book id="1">
+        <title>Introduction to XML</title>
+        <author>John Doe</author>
+        <year>2023</year>
+        <category>Programming</category>
+    </book>
+    <book id="2">
+        <title>Advanced XML Techniques</title>
+        <author>Jane Smith</author>
+        <year>2023</year>
+        <category>Programming</category>
+    </book>
+    <magazine id="3">
+        <title>XML Weekly</title>
+        <issue>2023-01</issue>
+        <category>News</category>
+    </magazine>
+</library>
+            </textarea>
+            <br>
+            <button onclick="analyzeXML()">Analyze XML Structure</button>
+            <button onclick="validateXML()">Validate XML</button>
+            <button onclick="previewXML()">Preview Content</button>
+            <button onclick="generateSample()">Generate Sample XML</button>
+            <button onclick="analyzeXSD()">Analyze XSD Content</button>
+        </div>
+        
+        <div>
+            <h3>Results</h3>
+            <div id="results" class="result">Click a button to analyze the XML...</div>
+        </div>
+    </div>
+
+    <!-- Load XML Introspect from CDN -->
+    <script src="../../packages/xml-introspect/dist/xml-introspect.umd.js"></script>
+    
+    <script>
+        // Example XML content
+        const sampleXML = `<?xml version="1.0" encoding="UTF-8"?>
+<library>
+    <book id="1">
+        <title>Introduction to XML</title>
+        <author>John Doe</author>
+        <year>2023</year>
+        <category>Programming</category>
+    </book>
+    <book id="2">
+        <title>Advanced XML Techniques</title>
+        <author>Jane Smith</author>
+        <year>2023</year>
+        <category>Programming</category>
+    </book>
+    <magazine id="3">
+        <title>XML Weekly</title>
+        <issue>2023-01</issue>
+        <category>News</category>
+    </magazine>
+</library>`;
+
+        // Set default content
+        document.getElementById('xmlInput').value = sampleXML;
+
+        function showResult(data, isError = false) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.textContent = JSON.stringify(data, null, 2);
+            resultsDiv.className = `result ${isError ? 'error' : 'success'}`;
+        }
+
+        async function analyzeXML() {
+            const xmlContent = document.getElementById('xmlInput').value;
+            if (!xmlContent.trim()) {
+                showResult({ error: 'Please enter XML content' }, true);
+                return;
+            }
+
+            try {
+                // Using the global XMLIntrospect object
+                const result = await XMLIntrospect.analyzeXML(xmlContent);
+                showResult(result);
+            } catch (error) {
+                showResult({ error: error.message }, true);
+            }
+        }
+
+        async function validateXML() {
+            const xmlContent = document.getElementById('xmlInput').value;
+            if (!xmlContent.trim()) {
+                showResult({ error: 'Please enter XML content' }, true);
+                return;
+            }
+
+            try {
+                const result = await XMLIntrospect.validateXML(xmlContent);
+                showResult(result);
+            } catch (error) {
+                showResult({ error: error.message }, true);
+            }
+        }
+
+        function previewXML() {
+            const xmlContent = document.getElementById('xmlInput').value;
+            if (!xmlContent.trim()) {
+                showResult({ error: 'Please enter XML content' }, true);
+                return;
+            }
+
+            try {
+                const result = XMLIntrospect.previewXML(xmlContent, 5);
+                showResult(result);
+            } catch (error) {
+                showResult({ error: error.message }, true);
+            }
+        }
+
+        function generateSample() {
+            try {
+                const result = XMLIntrospect.generateSampleXML(10);
+                showResult({ 
+                    message: 'Generated sample XML with 10 elements',
+                    sampleXML: result 
+                });
+            } catch (error) {
+                showResult({ error: error.message }, true);
+            }
+        }
+
+        async function analyzeXSD() {
+            const xsdContent = `<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="library">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="book" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:attribute name="id" type="xs:integer" use="required"/>
+                        <xs:sequence>
+                            <xs:element name="title" type="xs:string"/>
+                            <xs:element name="author" type="xs:string"/>
+                            <xs:element name="year" type="xs:integer"/>
+                            <xs:element name="category" type="xs:string"/>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>`;
+
+            try {
+                const result = await XMLIntrospect.analyzeXSD(xsdContent);
+                showResult(result);
+            } catch (error) {
+                showResult({ error: error.message }, true);
+            }
+        }
+
+        // Log available methods for debugging
+        console.log('Available XMLIntrospect methods:', Object.keys(window.XMLIntrospect));
+    </script>
+</body>
+</html>
+
