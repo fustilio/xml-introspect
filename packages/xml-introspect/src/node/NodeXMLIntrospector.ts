@@ -7,11 +7,21 @@
 
 import { writeFileSync, readFileSync, statSync, createReadStream } from 'fs';
 import {
-  XMLAnalyzer,
+  type XMLElement,
+  type ElementTypeInfo,
+  type SamplingOptions,
+  type XSDFromXMLOptions,
+  type XMLFromXSDOptions,
+  type ValidationOptions,
+  type XMLValidationResult,
+  type PatternRule,
   type XMLStructure,
-  type ContentAnalysis,
-} from '../core/XMLAnalyzer.js';
-import { XSDParser } from '../core/XSDParser.js';
+} from '../core/types/base.js';
+import {
+  type XSDASTResult,
+  type XSDASTComparison,
+} from '../xsdast/types.js';
+import { XMLAnalyzer } from '../core/XMLAnalyzer.js';
 import {
   XMLFakerGenerator,
   type XMLFakerOptions,
@@ -24,6 +34,7 @@ import { find } from 'unist-util-find';
 import { map } from 'unist-util-map';
 import { size } from 'unist-util-size';
 import { parents } from 'unist-util-parents';
+import { x } from 'xastscript';
 import sax from 'sax';
 import type { Tag } from 'sax';
 import { validateXML, memoryPages } from 'xmllint-wasm';
@@ -32,100 +43,15 @@ import {
   Element as XASTElement,
   Text as XASTText,
 } from 'xast';
-
-// Pattern rule types
-interface PatternRule {
-  elementName: string;
-  attributes: string[];
-  children: string[];
-  minOccurrences: number;
-  maxOccurrences: number;
-  constraints: Array<{
-    type: 'attribute' | 'child';
-    name: string;
-    required: boolean;
-  }>;
-}
-
-// Sampling strategy enum
-enum SamplingStrategy {
-  BALANCED = 'balanced',
-  RANDOM = 'random',
-  FIRST = 'first',
-}
+import { SamplingStrategy } from '../core/enums.js';
 
 // Node.js-specific types
-export interface SamplingOptions {
-  maxElements?: number;
-  maxDepth?: number;
-  strategy?: 'balanced' | 'random' | 'first';
-  preserveAttributes?: boolean;
-  preserveRelationships?: boolean;
-  preserveAllTypes?: boolean;
-  elementTypeLimits?: Record<string, number>;
-  schema?: string;
-}
-
-export interface XSDFromXMLOptions {
-  targetNamespace?: string;
-  elementForm?: 'qualified' | 'unqualified';
-  attributeForm?: 'qualified' | 'unqualified';
-  verbose?: boolean;
-}
-
-export interface XMLFromXSDOptions {
-  maxElements?: number;
-  generateRealisticData?: boolean;
-}
-
 export interface XMLTransformationOptions {
   inputFile: string;
   outputFile: string;
   maxElements?: number;
   preserveStructure?: boolean;
   samplingStrategy?: 'balanced' | 'random' | 'first';
-}
-
-export interface ValidationOptions {
-  strict?: boolean;
-  schema?: string;
-}
-
-export interface XMLValidationResult {
-  valid: boolean;
-  errors: string[];
-  warnings: string[];
-}
-
-// Node.js-specific element types
-export interface ElementTypeInfo {
-  count: number;
-  attributes: Set<string>;
-  children: Set<string>;
-  maxDepth: number;
-  examples: XMLElement[];
-}
-
-export interface XMLElement {
-  tagName: string;
-  attributes: Record<string, string>;
-  children: XMLElement[];
-  depth: number;
-  parent?: XMLElement;
-  textContent?: string;
-}
-
-export interface NodeXMLStructure {
-  elementCounts: Record<string, number>;
-  attributeCounts: Record<string, number>;
-  rootElements: string[];
-  commonElements: Array<{ name: string; count: number }>;
-  attributes: Array<{ name: string; count: number }>;
-  maxDepth: number;
-  totalElements: number;
-  rootElement: string;
-  elementTypes: Map<string, ElementTypeInfo>;
-  namespaces: Map<string, string>;
 }
 
 const LARGE_FILE_THRESHOLD_BYTES = 10 * 1024 * 1024; // 10MB
@@ -156,7 +82,7 @@ export class NodeXMLIntrospector extends XMLAnalyzer {
   async analyzeStructure(
     filePath: string,
     verbose: boolean = false
-  ): Promise<NodeXMLStructure> {
+  ): Promise<XMLStructure> {
     const stats = statSync(filePath);
     const fileSizeMB = (stats.size / (1024 * 1024)).toFixed(1);
     if (verbose) console.log(`📊 Analyzing XML file: ${fileSizeMB} MB`);
@@ -217,7 +143,10 @@ export class NodeXMLIntrospector extends XMLAnalyzer {
           const element: XMLElement = {
             tagName,
             attributes: Object.fromEntries(
-              Object.entries(node.attributes ?? {}).map(([key, value]) => [key, String(value ?? '')])
+              Object.entries(node.attributes ?? {}).map(([key, value]) => [
+                key,
+                String(value ?? ''),
+              ])
             ),
             children: [],
             depth: depth,
@@ -265,7 +194,10 @@ export class NodeXMLIntrospector extends XMLAnalyzer {
           }
 
           // Store examples (text content or attributes)
-          if ((textContent || Object.keys(element.attributes).length > 0) && elementInfo.examples.length < 5) {
+          if (
+            (textContent || Object.keys(element.attributes).length > 0) &&
+            elementInfo.examples.length < 5
+          ) {
             elementInfo.examples.push(element);
           }
 
@@ -299,7 +231,6 @@ export class NodeXMLIntrospector extends XMLAnalyzer {
         // Single root element
         traverseNode(xast);
       }
-
 
       if (verbose) {
         console.log(
@@ -376,7 +307,7 @@ export class NodeXMLIntrospector extends XMLAnalyzer {
    * Generate XSD from structure
    */
   private generateXSDFromStructure(
-    structure: NodeXMLStructure,
+    structure: XMLStructure,
     options: XSDFromXMLOptions = {}
   ): string {
     const targetNamespace =
@@ -427,9 +358,9 @@ export class NodeXMLIntrospector extends XMLAnalyzer {
   private async _analyzeStructureStreaming(
     filePath: string,
     verbose: boolean = false
-  ): Promise<NodeXMLStructure> {
+  ): Promise<XMLStructure> {
     return new Promise((resolve, reject) => {
-      const structure: NodeXMLStructure = {
+      const structure: XMLStructure = {
         elementCounts: {},
         attributeCounts: {},
         rootElements: [],
@@ -494,11 +425,17 @@ export class NodeXMLIntrospector extends XMLAnalyzer {
         }
 
         // Store examples for elements with attributes
-        if (Object.keys(node.attributes || {}).length > 0 && elementInfo.examples.length < 5) {
+        if (
+          Object.keys(node.attributes || {}).length > 0 &&
+          elementInfo.examples.length < 5
+        ) {
           const example: XMLElement = {
             tagName,
             attributes: Object.fromEntries(
-              Object.entries(node.attributes || {}).map(([key, value]) => [key, String(value ?? '')])
+              Object.entries(node.attributes || {}).map(([key, value]) => [
+                key,
+                String(value ?? ''),
+              ])
             ),
             children: [],
             depth: currentDepth,
@@ -833,7 +770,10 @@ export class NodeXMLIntrospector extends XMLAnalyzer {
       elements.push({
         tagName: xastElement.name,
         attributes: Object.fromEntries(
-          Object.entries(xastElement.attributes ?? {}).map(([key, value]) => [key, String(value ?? '')])
+          Object.entries(xastElement.attributes ?? {}).map(([key, value]) => [
+            key,
+            String(value ?? ''),
+          ])
         ),
         children: [],
         depth: 0, // Would need proper depth calculation
@@ -910,7 +850,10 @@ export class NodeXMLIntrospector extends XMLAnalyzer {
       return {
         tagName: xastElement.name,
         attributes: Object.fromEntries(
-          Object.entries(xastElement.attributes ?? {}).map(([key, value]) => [key, String(value ?? '')])
+          Object.entries(xastElement.attributes ?? {}).map(([key, value]) => [
+            key,
+            String(value ?? ''),
+          ])
         ),
         children: [],
         depth: 0, // Would need proper depth calculation
@@ -944,9 +887,7 @@ export class NodeXMLIntrospector extends XMLAnalyzer {
   async generateXMLProgrammatically(
     template: Record<string, any>
   ): Promise<string> {
-    const { x } = require('xastscript');
-
-    // Build XML structure using xastscript
+    // Build XML structure using xastscript with proper type safety
     const rootElement = x('root', template);
 
     return toXml(rootElement);
@@ -963,8 +904,7 @@ export class NodeXMLIntrospector extends XMLAnalyzer {
       children?: string[];
     }>;
   }): Promise<string> {
-    const { x } = require('xastscript');
-
+    // Use proper xastscript composition for better performance
     const children = structure.elements.map((element) => {
       if (element.children && element.children.length > 0) {
         return x(
@@ -1124,7 +1064,7 @@ export class NodeXMLIntrospector extends XMLAnalyzer {
     return nodes;
   }
 
-  private parseXSDStructure(xsdContent: string): NodeXMLStructure {
+  private parseXSDStructure(xsdContent: string): XMLStructure {
     const elementTypes = new Map<string, ElementTypeInfo>();
     const namespaces = new Map<string, string>();
 
@@ -1167,7 +1107,7 @@ export class NodeXMLIntrospector extends XMLAnalyzer {
   }
 
   private generateXMLFromStructure(
-    structure: NodeXMLStructure,
+    structure: XMLStructure,
     options: XMLFromXSDOptions
   ): string {
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
@@ -1213,7 +1153,7 @@ export class NodeXMLIntrospector extends XMLAnalyzer {
     xml += `</${structure.rootElement}>`;
     return xml;
   }
-  private identifyPatternsAndRules(structure: NodeXMLStructure): PatternRule[] {
+  private identifyPatternsAndRules(structure: XMLStructure): PatternRule[] {
     const rules: PatternRule[] = [];
 
     for (const [elementName, typeInfo] of Array.from(
@@ -1253,7 +1193,7 @@ export class NodeXMLIntrospector extends XMLAnalyzer {
   }
 
   private generateExpandedXML(
-    structure: NodeXMLStructure,
+    structure: XMLStructure,
     rules: PatternRule[],
     targetSize: number
   ): string {
@@ -1296,7 +1236,7 @@ export class NodeXMLIntrospector extends XMLAnalyzer {
   }
 
   private selectSampleElements(
-    structure: NodeXMLStructure,
+    structure: XMLStructure,
     options: SamplingOptions
   ): XMLElement[] {
     const { maxElements = 100, strategy, preserveAllTypes } = options;
@@ -1415,7 +1355,7 @@ export class NodeXMLIntrospector extends XMLAnalyzer {
   }
 
   private includeReferencedElements(
-    structure: NodeXMLStructure,
+    structure: XMLStructure,
     sampleElements: XMLElement[],
     referencedIds: Set<string>,
     maxElements: number
@@ -1556,7 +1496,7 @@ export class NodeXMLIntrospector extends XMLAnalyzer {
   }
 
   private selectBalancedElements(
-    structure: NodeXMLStructure,
+    structure: XMLStructure,
     count: number,
     sampleElements: XMLElement[],
     maxTotalElements: number,
@@ -1575,7 +1515,7 @@ export class NodeXMLIntrospector extends XMLAnalyzer {
   }
 
   private selectRandomElements(
-    structure: NodeXMLStructure,
+    structure: XMLStructure,
     count: number,
     sampleElements: XMLElement[],
     maxTotalElements: number,
@@ -1596,7 +1536,7 @@ export class NodeXMLIntrospector extends XMLAnalyzer {
   }
 
   private selectFirstElements(
-    structure: NodeXMLStructure,
+    structure: XMLStructure,
     count: number,
     sampleElements: XMLElement[],
     maxTotalElements: number,
@@ -1617,7 +1557,7 @@ export class NodeXMLIntrospector extends XMLAnalyzer {
 
   private buildSampleXML(
     elements: XMLElement[],
-    structure: NodeXMLStructure,
+    structure: XMLStructure,
     options: SamplingOptions
   ): string {
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
@@ -1842,7 +1782,7 @@ export class NodeXMLIntrospector extends XMLAnalyzer {
   /**
    * Generate XSD AST from XSD content
    */
-  generateXSDAST(xsdContent: string): { elements: Map<string, any>; rootElement: string } {
+  generateXSDAST(xsdContent: string): XSDASTResult {
     const xast = fromXml(xsdContent);
     const elements = new Map<string, any>();
     let rootElement = '';
@@ -1851,12 +1791,13 @@ export class NodeXMLIntrospector extends XMLAnalyzer {
       if (node.type === 'element' && node.name) {
         const tagName = node.name.includes(':') ? node.name : node.name;
         if (!rootElement) rootElement = tagName;
-        
+
         elements.set(tagName, {
           name: tagName,
           type: 'element',
           attributes: node.attributes ?? {},
-          children: node.children?.filter((c: any) => c.type === 'element') || []
+          children:
+            node.children?.filter((c: any) => c.type === 'element') || [],
         });
 
         if (node.children) {
@@ -1885,42 +1826,44 @@ export class NodeXMLIntrospector extends XMLAnalyzer {
   /**
    * Compare two XSD ASTs for structural similarity
    */
-  compareXSDAST(ast1: { elements: Map<string, any>; rootElement: string }, ast2: { elements: Map<string, any>; rootElement: string }): {
-    equal: boolean;
-    elementDifferences: string[];
-    attributeDifferences: string[];
-    namespaceDifferences: string[];
-    structuralDifferences: string[];
-  } {
+  compareXSDAST(ast1: XSDASTResult, ast2: XSDASTResult): XSDASTComparison {
     const result = {
       equal: false,
       elementDifferences: [] as string[],
       attributeDifferences: [] as string[],
       namespaceDifferences: [] as string[],
-      structuralDifferences: [] as string[]
+      structuralDifferences: [] as string[],
     };
 
     // Check root elements
     if (ast1.rootElement !== ast2.rootElement) {
-      result.structuralDifferences.push(`Root element mismatch: ${ast1.rootElement} vs ${ast2.rootElement}`);
+      result.structuralDifferences.push(
+        `Root element mismatch: ${ast1.rootElement} vs ${ast2.rootElement}`
+      );
     }
 
     const elements1 = Array.from(ast1.elements.keys());
     const elements2 = Array.from(ast2.elements.keys());
-    
+
     // Find element differences
-    const onlyIn1 = elements1.filter(el => !elements2.includes(el));
-    const onlyIn2 = elements2.filter(el => !elements1.includes(el));
-    
-    result.elementDifferences.push(...onlyIn1.map(el => `Only in AST1: ${el}`));
-    result.elementDifferences.push(...onlyIn2.map(el => `Only in AST2: ${el}`));
+    const onlyIn1 = elements1.filter((el) => !elements2.includes(el));
+    const onlyIn2 = elements2.filter((el) => !elements1.includes(el));
+
+    result.elementDifferences.push(
+      ...onlyIn1.map((el) => `Only in AST1: ${el}`)
+    );
+    result.elementDifferences.push(
+      ...onlyIn2.map((el) => `Only in AST2: ${el}`)
+    );
 
     // Check if both have similar element types (allowing for some variation)
-    const commonElements = elements1.filter(el => elements2.includes(el));
-    const similarity = commonElements.length / Math.max(elements1.length, elements2.length);
-    
-    result.equal = similarity > 0.7 && result.structuralDifferences.length === 0; // 70% similarity threshold
-    
+    const commonElements = elements1.filter((el) => elements2.includes(el));
+    const similarity =
+      commonElements.length / Math.max(elements1.length, elements2.length);
+
+    result.equal =
+      similarity > 0.7 && result.structuralDifferences.length === 0; // 70% similarity threshold
+
     return result;
   }
 }

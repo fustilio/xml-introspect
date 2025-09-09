@@ -32,6 +32,8 @@ function _toXml(node: any, indentLevel: number): string {
 
             if (onlyTextChildren && textContent) {
                 xml += `>${escapeText(textContent)}</${element.name}>\n`;
+            } else if (onlyTextChildren && !textContent) {
+                xml += ' />\n';
             } else if (element.children.length > 0) {
                 xml += '>\n';
                 for (const child of element.children) {

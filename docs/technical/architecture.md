@@ -103,6 +103,77 @@ export class BrowserXSDParser extends XSDParser {
 }
 ```
 
+## XSD Validation Architecture
+
+The XSD validation system is built on top of the XSDAST (XSD Abstract Syntax Tree) module, providing comprehensive validation and quality analysis capabilities.
+
+### XSDAST Module Structure
+
+```
+src/xsdast/
+├── types.ts          # XSD type definitions and interfaces
+├── traverser.ts      # Tree traversal and querying utilities
+├── validator.ts      # XSD validation and quality analysis
+├── helper.ts         # Common XSD manipulation functions
+├── generator.ts      # Recursive XSD generation utilities
+└── utils.ts          # Utility functions
+```
+
+### XSDASTValidator Class
+
+The `XSDASTValidator` class provides practical XSD validation capabilities:
+
+```typescript
+// validator.ts
+export class XSDASTValidator {
+  private traverser: XSDASTTraverser;
+  private helper: XSDHelper;
+  private validationRules: XSDValidationRule[] = [];
+
+  constructor(traverser: XSDASTTraverser) {
+    this.traverser = traverser;
+    this.helper = new XSDHelper(traverser);
+    this.initializeDefaultRules();
+  }
+
+  async validate(): Promise<XSDValidationResult> {
+    // Comprehensive validation logic
+  }
+
+  checkDesignIssues(): XSDDesignIssues {
+    // Design issue detection
+  }
+
+  getSchemaSummary(): XSDSchemaSummary {
+    // Schema analysis
+  }
+}
+```
+
+### Validation Features
+
+- **Structural Validation**: Checks XSD syntax and structure
+- **Design Issue Detection**: Identifies common XSD problems
+- **Quality Scoring**: Rates schema completeness (0-100)
+- **Best Practice Recommendations**: Suggests improvements
+- **Schema Analysis**: Provides detailed structure summaries
+
+### Integration with Core Module
+
+The XSD validation system integrates with the core XSD parsing functionality:
+
+```typescript
+// Parse XSD and create validator
+const xsdAST = await parser.parseXSDFile('schema.xsd');
+const traverser = new XSDASTTraverser(xsdAST);
+const validator = new XSDASTValidator(traverser);
+
+// Validate and analyze
+const validationResult = await validator.validate();
+const designIssues = validator.checkDesignIssues();
+const summary = validator.getSchemaSummary();
+```
+
 ## Build Configuration
 
 ### Vite Configuration

@@ -106,6 +106,74 @@ const elementNames = parser.getElementNames();
 const summary = parser.getStructureSummary();
 ```
 
+## XSD Validation & Quality Analysis
+
+The `XSDASTValidator` class provides comprehensive XSD validation and quality analysis capabilities.
+
+```typescript
+import { XSDASTValidator, XSDASTTraverser } from 'xml-introspect/xsdast';
+
+// Create validator from XSD AST
+const traverser = new XSDASTTraverser(xsdAST);
+const validator = new XSDASTValidator(traverser);
+```
+
+### Methods
+
+#### `validate()`
+
+Validate XSD structure and return comprehensive validation results.
+
+```typescript
+const result = await validator.validate();
+console.log('Valid:', result.isValid);
+console.log('Errors:', result.errors);
+console.log('Warnings:', result.warnings);
+console.log('Statistics:', result.statistics);
+```
+
+#### `checkDesignIssues()`
+
+Check for common XSD design issues and provide recommendations.
+
+```typescript
+const issues = validator.checkDesignIssues();
+console.log('Issues:', issues.issues);
+console.log('Recommendations:', issues.recommendations);
+console.log('Quality Score:', issues.qualityScore);
+```
+
+#### `getSchemaSummary()`
+
+Get detailed summary of schema structure and quality.
+
+```typescript
+const summary = validator.getSchemaSummary();
+console.log('Elements:', summary.elementCount);
+console.log('Types:', summary.complexTypeCount + summary.simpleTypeCount);
+console.log('Has Target Namespace:', summary.hasTargetNamespace);
+console.log('Circular References:', summary.circularReferences);
+console.log('Quality Score:', summary.qualityScore);
+```
+
+#### `validateNode(node)`
+
+Validate a specific XSD AST node.
+
+```typescript
+const nodeResult = validator.validateNode(elementNode);
+console.log('Node Valid:', nodeResult.isValid);
+console.log('Node Errors:', nodeResult.errors);
+```
+
+### Validation Features
+
+- **Structural Validation**: Checks XSD syntax and structure
+- **Design Issue Detection**: Identifies common XSD problems
+- **Quality Scoring**: Rates schema completeness (0-100)
+- **Best Practice Recommendations**: Suggests improvements
+- **Schema Analysis**: Provides detailed structure summaries
+
 ## XMLIntrospector
 
 Main class for XML analysis and processing.

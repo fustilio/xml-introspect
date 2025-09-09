@@ -1,7 +1,6 @@
 import { faker, Faker } from '@faker-js/faker';
 import { fromXml } from 'xast-util-from-xml';
 import { toXml } from 'xast-util-to-xml';
-import { XASTNode, XASTElement, XASTText } from './types.js';
 
 export interface XMLFakerOptions {
   /**
@@ -66,6 +65,7 @@ export class XMLFakerGenerator {
       maxDepth: options.maxDepth || 5,
       maxChildren: options.maxChildren || 10,
       realisticData: options.realisticData ?? true,
+      maxElements: options.maxElements || 100,
       customGenerators: options.customGenerators || {},
       preserveStructure: options.preserveStructure ?? false
     };

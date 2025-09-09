@@ -8,17 +8,21 @@ import {
   XSDChoice,
   XSDRestriction,
   XSDAST,
+  XSDASTWrapper,
   XSDElementInfo,
   XSDAttributeInfo,
   XSDTypeInfo,
-  XSDBaseNode,
-  XASTElement
-} from './types';
+  XSDASTNode,
+} from '../xsdast/types.js';
+import type { Element as XASTElement } from 'xast';
 import { fromXml } from 'xast-util-from-xml';
 import { visit, SKIP } from 'unist-util-visit';
 
 export abstract class XSDParser {
   protected xsdXAST: XSDAST | null = null;
+  protected elements: Map<string, XSDElementInfo> = new Map();
+  protected attributes: Map<string, XSDAttributeInfo> = new Map();
+  protected types: Map<string, XSDTypeInfo> = new Map();
 
   /**
    * Parse an XSD file into a unified XAST structure
@@ -51,12 +55,12 @@ export abstract class XSDParser {
       };
     }
     
-    const convertNode = (xastNode: XASTElement): XSDBaseNode => {
-      const name = xastNode.name.replace(/xs:/g, '');
-      const xsdNode: XSDBaseNode = {
-        type: `xsd:${name}`,
+    const convertNode = (xastNode: XASTElement): XSDASTNode => {
+      const name = (xastNode.name || '').replace(/xs:/g, '');
+      const xsdNode: XSDASTNode = {
+        type: `xsd:${name}` as any,
         name: name,
-        attributes: xastNode.attributes || {},
+        attributes: (xastNode.attributes || {}) as Record<string, string>,
         children: []
       };
 
@@ -68,32 +72,39 @@ export abstract class XSDParser {
       return xsdNode;
     };
 
-    const schema: XSDSchema = convertNode(schemaNode) as XSDSchema;
-    const elements = new Map<string, XSDElementInfo>();
-    const attributes = new Map<string, XSDAttributeInfo>();
-    const types = new Map<string, XSDTypeInfo>();
+    const schema: XSDSchema = {
+      elements: new Map(),
+      complexTypes: new Map(),
+      simpleTypes: new Map(),
+      namespaces: new Map()
+    };
+    this.elements.clear();
+    this.attributes.clear();
+    this.types.clear();
 
-    const extractElementInfo = (xsdElementNode: XSDElement): XSDElementInfo => {
-      const name = xsdElementNode.attributes.name || xsdElementNode.attributes.ref!;
-      const elementAttributes = new Set<string>();
-      const elementChildren = new Set<string>();
+    const extractElementInfo = (xsdElementNode: XSDASTNode): XSDElementInfo => {
+      const name = xsdElementNode.attributes.name || xsdElementNode.attributes.ref || '';
+      const elementAttributes: XSDAttributeInfo[] = [];
+      const elementChildren: XSDElementInfo[] = [];
 
-      const complexTypeNode = xsdElementNode.children?.find(c => c.type === 'xsd:complexType') as XSDComplexType;
+      const complexTypeNode = xsdElementNode.children?.find(c => c.type === 'xsd:complexType');
       if (complexTypeNode) {
         complexTypeNode.children?.forEach(child => {
           if (child.type === 'xsd:attribute') {
-            const attr = child as XSDAttribute;
-            if (attr.attributes.name) elementAttributes.add(attr.attributes.name);
+            elementAttributes.push({
+              name: child.attributes.name || '',
+              type: child.attributes.type || 'string',
+              use: (child.attributes.use as 'optional' | 'required' | 'prohibited') || 'optional',
+              form: (child.attributes.form as 'qualified' | 'unqualified') || 'unqualified'
+            });
           }
         });
 
-        const sequenceNode = complexTypeNode.children?.find(c => c.type === 'xsd:sequence') as XSDSequence;
+        const sequenceNode = complexTypeNode.children?.find(c => c.type === 'xsd:sequence');
         if (sequenceNode) {
           sequenceNode.children?.forEach(child => {
             if (child.type === 'xsd:element') {
-              const el = child as XSDElement;
-              if (el.attributes.name) elementChildren.add(el.attributes.name);
-              if (el.attributes.ref) elementChildren.add(el.attributes.ref);
+              elementChildren.push(extractElementInfo(child));
             }
           });
         }
@@ -102,43 +113,52 @@ export abstract class XSDParser {
       return {
         name,
         type: 'element',
+        minOccurs: parseInt(xsdElementNode.attributes.minOccurs || '1'),
+        maxOccurs: xsdElementNode.attributes.maxOccurs === 'unbounded' ? 'unbounded' : parseInt(xsdElementNode.attributes.maxOccurs || '1'),
+        nillable: xsdElementNode.attributes.nillable === 'true',
         attributes: elementAttributes,
         children: elementChildren,
-        minOccurs: xsdElementNode.attributes.minOccurs || '1',
-        maxOccurs: xsdElementNode.attributes.maxOccurs || '1',
-        isRef: !!xsdElementNode.attributes.ref,
-        xsdNode: xsdElementNode
+        isComplex: !!complexTypeNode,
+        isAbstract: xsdElementNode.attributes.abstract === 'true'
       };
     };
     
-    schema.children.forEach(node => {
-      if (node.type === 'xsd:element') {
-        const el = node as XSDElement;
-        const name = el.attributes.name || el.attributes.ref;
+    schemaNode.children?.forEach(node => {
+      if (node.type === 'element' && (node as XASTElement).name?.includes('element')) {
+        const xastElement = node as XASTElement;
+        const name = xastElement.attributes?.name || xastElement.attributes?.ref;
         if (name) {
-          elements.set(name, extractElementInfo(el));
+          this.elements.set(name, extractElementInfo(convertNode(xastElement)));
 
           // Also recursively find nested elements
-          visit(el, (childNode: any) => {
-            if (childNode.type === 'xsd:element' && childNode.attributes.name) {
-              elements.set(childNode.attributes.name, extractElementInfo(childNode));
+          visit(node, (childNode: any) => {
+            if (childNode.type === 'element' && childNode.name?.includes('element') && childNode.attributes?.name) {
+              this.elements.set(childNode.attributes.name, extractElementInfo(convertNode(childNode)));
             }
           });
         }
       }
     });
 
-    const xsdXAST: XSDAST = {
-      root: schema,
-      elements,
-      attributes,
-      types,
-      namespaces: new Map(Object.entries(schema.attributes).filter(([k]) => k.startsWith('xmlns') || k === 'targetNamespace')),
-      rootElement: elements.keys().next().value || null
+    const rootNode: XSDASTNode = {
+      type: 'xsd:schema',
+      name: 'schema',
+      attributes: (schemaNode.attributes || {}) as Record<string, string>,
+      children: schemaNode.children?.map(child => convertNode(child as XASTElement)) || [],
+      text: undefined
     };
 
-    this.xsdXAST = xsdXAST;
-    return xsdXAST;
+    const xsdXAST: XSDASTWrapper = {
+      root: rootNode,
+      elements: this.elements,
+      attributes: this.attributes,
+      types: this.types,
+      namespaces: new Map(Object.entries(schemaNode.attributes || {}).filter(([k, v]) => (k.startsWith('xmlns') || k === 'targetNamespace') && v != null).map(([k, v]) => [k, v as string])),
+      rootElement: this.elements.keys().next().value || null
+    };
+
+    this.xsdXAST = xsdXAST as any; // Cast to any for backward compatibility
+    return xsdXAST as any; // Cast to any for backward compatibility
   }
 
   /**
@@ -153,7 +173,7 @@ export abstract class XSDParser {
    */
   getElementNames(): string[] {
     if (!this.xsdXAST) return [];
-    return Array.from(this.xsdXAST.elements.keys());
+    return Array.from(this.elements.keys());
   }
 
   /**
@@ -161,7 +181,7 @@ export abstract class XSDParser {
    */
   getElement(name: string): XSDElementInfo | undefined {
     if (!this.xsdXAST) return undefined;
-    return this.xsdXAST.elements.get(name);
+    return this.elements.get(name);
   }
 
   /**
@@ -169,7 +189,7 @@ export abstract class XSDParser {
    */
   getAttributeNames(): string[] {
     if (!this.xsdXAST) return [];
-    return Array.from(this.xsdXAST.attributes.keys());
+    return Array.from(this.attributes.keys());
   }
 
   /**
@@ -177,7 +197,7 @@ export abstract class XSDParser {
    */
   getAttribute(name: string): XSDAttributeInfo | undefined {
     if (!this.xsdXAST) return undefined;
-    return this.xsdXAST.attributes.get(name);
+    return this.attributes.get(name);
   }
 
   /**
@@ -196,12 +216,13 @@ export abstract class XSDParser {
   getStructureSummary(): string {
     if (!this.xsdXAST) return 'No XSD loaded';
     
-    const elementCount = this.xsdXAST.elements.size;
-    const attributeCount = this.xsdXAST.attributes.size;
-    const typeCount = this.xsdXAST.types.size;
+    const elementCount = this.elements.size;
+    const attributeCount = this.attributes.size;
+    const typeCount = this.types.size;
+    const rootElement = this.elements.keys().next().value || 'None';
     
     return `XSD Structure Summary:
- - Root Element: ${this.xsdXAST.rootElement || 'None'}
+ - Root Element: ${rootElement}
  - Elements: ${elementCount}
  - Attributes: ${attributeCount}
  - Types: ${typeCount}`;

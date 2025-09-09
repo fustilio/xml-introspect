@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, afterAll } from 'vitest';
 import { writeFileSync, unlinkSync, existsSync, mkdirSync, rmSync } from 'fs';
 import { join } from 'path';
 import { NodeXMLIntrospector } from '../../../src/node/NodeXMLIntrospector';
-import { SamplingStrategy } from '../../../src/core/types';
+import { SamplingStrategy } from '../../../src/core/enums';
 
 describe('XMLIntrospector', () => {
   let introspector: NodeXMLIntrospector;

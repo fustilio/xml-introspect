@@ -243,10 +243,48 @@ const sample = await introspector.generateSample(xmlContent, {
 const validation = await introspector.validateXML(xmlContent, xsdContent);
 ```
 
+## 🆕 XSD Validation & Quality Analysis
+
+The library now includes comprehensive XSD validation capabilities:
+
+```typescript
+import { XSDASTValidator, XSDASTTraverser } from 'xml-introspect/xsdast';
+
+// Parse XSD and create validator
+const traverser = new XSDASTTraverser(xsdAST);
+const validator = new XSDASTValidator(traverser);
+
+// Validate XSD structure
+const validationResult = await validator.validate();
+console.log('Valid:', validationResult.isValid);
+console.log('Errors:', validationResult.errors);
+
+// Check for design issues
+const designIssues = validator.checkDesignIssues();
+console.log('Issues:', designIssues.issues);
+console.log('Recommendations:', designIssues.recommendations);
+console.log('Quality Score:', designIssues.qualityScore);
+
+// Get schema summary
+const summary = validator.getSchemaSummary();
+console.log('Elements:', summary.elementCount);
+console.log('Types:', summary.complexTypeCount + summary.simpleTypeCount);
+console.log('Has Target Namespace:', summary.hasTargetNamespace);
+```
+
+### XSD Validation Features
+
+- **Structural Validation**: Checks XSD syntax and structure
+- **Design Issue Detection**: Identifies common XSD problems
+- **Quality Scoring**: Rates schema completeness (0-100)
+- **Best Practice Recommendations**: Suggests improvements
+- **Schema Analysis**: Provides detailed structure summaries
+
 ## Features
 
 - **XML Analysis**: Structure analysis and sampling
 - **XSD Generation**: Create schemas from XML
+- **XSD Validation**: Comprehensive XSD quality analysis and validation
 - **Real Data**: Process WordNet LMF files
 - **Memory Efficient**: Streams large files
 - **TypeScript**: Full type safety

@@ -36,7 +36,7 @@ export default createViteConfig({
   },
   // Optimize dependencies for CDN
   optimizeDeps: {
-    include: ['sax', 'xmllint-wasm']
+    include: ['sax', 'xmllint-wasm', 'xast']
   },
   define: {
     // Ensure proper global access

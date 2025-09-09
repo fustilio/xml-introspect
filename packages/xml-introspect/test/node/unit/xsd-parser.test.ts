@@ -108,11 +108,10 @@ describe('XSD Parser and Unified XAST', () => {
       console.log('\n👤 Person element structure:');
       console.log('  - Name:', personElement.name);
       console.log('  - Type:', personElement.type);
-      console.log('  - Children count:', personElement.children.size);
+      console.log('  - Children count:', personElement.children.length);
       
       // Check for complex type
-      const complexType = personElement.xsdNode.children.find(child => child.type === 'xsd:complexType');
-      expect(complexType).toBeDefined();
+      expect(personElement.isComplex).toBe(true);
     }
     
     // Get Company element details
@@ -122,8 +121,7 @@ describe('XSD Parser and Unified XAST', () => {
       console.log('\n🏢 Company element structure:');
       console.log('  - Name:', companyElement.name);
       console.log('  - Type:', companyElement.type);
-      console.log('  - Ref:', personElement?.xsdNode.attributes.ref);
-      console.log('  - MaxOccurs:', personElement?.xsdNode.attributes.maxOccurs);
+      console.log('  - MaxOccurs:', personElement?.maxOccurs);
     }
     
     // Validate XML structure
@@ -242,11 +240,10 @@ describe('XSD Parser and Unified XAST', () => {
       console.log('\n📚 LexicalEntry element structure:');
       console.log('  - Name:', lexicalEntry.name);
       console.log('  - Type:', lexicalEntry.type);
-      console.log('  - Children count:', lexicalEntry.children.size);
+      console.log('  - Children count:', lexicalEntry.children.length);
       
       // Check for complex type
-      const complexType = lexicalEntry.xsdNode.children.find(child => child.type === 'xsd:complexType');
-      expect(complexType).toBeDefined();
+      expect(lexicalEntry.isComplex).toBe(true);
     }
     
     // Validate WordNet XML structure
@@ -316,7 +313,7 @@ describe('XSD Parser and Unified XAST', () => {
       console.log('\n🌳 Tree element recursive structure:');
       console.log('  - Name:', treeElement.name);
       console.log('  - Type:', treeElement.type);
-      console.log('  - Children count:', treeElement.children.size);
+      console.log('  - Children count:', treeElement.children.length);
       
       // Navigate through the recursive structure
       let depth = 0;
@@ -324,7 +321,7 @@ describe('XSD Parser and Unified XAST', () => {
         const indent = '  '.repeat(currentDepth);
         console.log(`${indent}- ${element.name} (${element.type})`);
         
-        if (element.children && element.children.size > 0) {
+        if (element.children && element.children.length > 0) {
           element.children.forEach((child: any) => {
             if (child.type === 'xsd:complexType') {
               exploreStructure(child, currentDepth + 1);

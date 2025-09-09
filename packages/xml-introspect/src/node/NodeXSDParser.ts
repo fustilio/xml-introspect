@@ -1,5 +1,5 @@
 import { XSDParser } from '../core/XSDParser.js';
-import { XSDAST } from '../core/types.js';
+import { XSDAST } from '../xsdast/types.js';
 import { readFileSync } from 'fs';
 
 export class NodeXSDParser extends XSDParser {
