@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { XMLIntrospector } from "../../../src/node/XMLIntrospector";
+import { NodeXMLIntrospector } from "../../../src/node/NodeXMLIntrospector";
 import { join } from "path";
 import {
   existsSync,
@@ -17,12 +17,12 @@ const INPUT_DATA_DIR = join(DATA_DIR, "input");
 const OUTPUT_DATA_DIR = join(DATA_DIR, "output");
 
 describe("Integration Tests", () => {
-  let introspector: XMLIntrospector;
+  let introspector: NodeXMLIntrospector;
   let tempDir: string;
   let testFiles: string[] = [];
 
   beforeEach(() => {
-    introspector = new XMLIntrospector();
+    introspector = new NodeXMLIntrospector();
     tempDir = join(process.cwd(), ".temp/integration-test");
 
     // Create temp directory if it doesn't exist
@@ -64,7 +64,7 @@ describe("Integration Tests", () => {
       
       // Since the input is an XSD, we expect to see common XSD element types discovered.
       const expectedElements = ['schema', 'element', 'complexType', 'attribute', 'sequence'];
-      const foundElements = Array.from(generatedAst.elements.keys()).map(el => el.replace('xs:', ''));
+      const foundElements = Array.from(generatedAst.elements.keys()).map((el: string) => el.replace('xs:', ''));
 
       for (const el of expectedElements) {
         expect(foundElements, `Should contain element: ${el}`).toContain(el);

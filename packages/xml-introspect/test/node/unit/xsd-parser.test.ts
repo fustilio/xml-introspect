@@ -316,7 +316,7 @@ describe('XSD Parser and Unified XAST', () => {
       console.log('\n🌳 Tree element recursive structure:');
       console.log('  - Name:', treeElement.name);
       console.log('  - Type:', treeElement.type);
-      console.log('  - Children count:', treeElement.children.length);
+      console.log('  - Children count:', treeElement.children.size);
       
       // Navigate through the recursive structure
       let depth = 0;

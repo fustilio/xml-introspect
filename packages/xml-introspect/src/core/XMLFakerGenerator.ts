@@ -30,6 +30,11 @@ export interface XMLFakerOptions {
   realisticData?: boolean;
   
   /**
+   * Maximum number of elements to generate
+   */
+  maxElements?: number;
+  
+  /**
    * Custom data generators for specific element names
    */
   customGenerators?: Record<string, () => string>;

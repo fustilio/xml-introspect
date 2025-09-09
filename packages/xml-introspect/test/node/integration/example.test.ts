@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { XMLIntrospector } from '../../../src/node/XMLIntrospector';
+import { NodeXMLIntrospector } from '../../../src/node/NodeXMLIntrospector';
 import { writeFileSync, unlinkSync, existsSync, mkdirSync, rmSync, readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -26,8 +26,8 @@ describe('XML Introspector Example Usage', () => {
 
   it('should demonstrate basic functionality', async () => {
     console.log('🚀 Starting basic functionality test...');
-    const introspector = new XMLIntrospector();
-    console.log('✅ XMLIntrospector instance created');
+    const introspector = new NodeXMLIntrospector();
+    console.log('✅ NodeXMLIntrospector instance created');
     
     // Create a simple XML string for testing
     const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
@@ -103,8 +103,8 @@ describe('XML Introspector Example Usage', () => {
 
   it('should handle WordNet LMF structure correctly', async () => {
     console.log('🚀 Starting WordNet LMF structure test...');
-    const introspector = new XMLIntrospector();
-    console.log('✅ XMLIntrospector instance created');
+    const introspector = new NodeXMLIntrospector();
+    console.log('✅ NodeXMLIntrospector instance created');
     
     // Create WordNet LMF-like XML
     const lmfXML = `<?xml version="1.0" encoding="UTF-8"?>

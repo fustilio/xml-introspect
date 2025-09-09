@@ -46,6 +46,34 @@ await introspector.generateSample('input.xml', 'output.xml', {
 await introspector.generateSchema('input.xml', 'schema.xsd');
 ```
 
+## Feature Availability
+
+| Feature | CLI | Node.js | Browser/CDN |
+|---------|-----|---------|------------|
+| **XML Analysis** |
+| Analyze XML structure | ✅ | ✅ | ✅ |
+| Content preview | ✅ | ✅ | ✅ |
+| XML validation | ✅ | ✅ | ✅ |
+| **XSD Operations** |
+| Generate XSD from XML | ✅ | ✅ | ❌ |
+| Analyze XSD content | ✅ | ✅ | ✅ |
+| Generate XML from XSD | ✅ | ✅ | ✅ |
+| Validate XML against XSD | ✅ | ✅ | ❌ |
+| **XML Generation** |
+| Generate sample XML | ✅ | ✅ | ✅ |
+| Generate realistic XML | ✅ | ✅ | ✅ |
+| Expand small XML to large | ✅ | ✅ | ❌ |
+| **File Operations** |
+| Process local files | ✅ | ✅ | ❌ |
+| Process URLs/remote files | ✅ | ✅ | ✅ |
+| Process compressed files (.gz, .tar, etc.) | ✅ | ✅ | ✅ |
+| Multi-file processing (archives) | ✅ | ✅ | ✅ |
+| **Advanced Features** |
+| Streaming for large files | ✅ | ✅ | ❌ |
+| Roundtrip XML processing | ✅ | ✅ | ❌ |
+| Element search/filtering | ✅ | ✅ | ❌ |
+| Structure transformation | ✅ | ✅ | ❌ |
+
 ## Features
 
 - **XML Analysis**: Structure analysis and sampling

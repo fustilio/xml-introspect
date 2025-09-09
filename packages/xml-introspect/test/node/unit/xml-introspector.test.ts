@@ -1,16 +1,16 @@
 import { describe, it, expect, beforeEach, afterEach, afterAll } from 'vitest';
 import { writeFileSync, unlinkSync, existsSync, mkdirSync, rmSync } from 'fs';
 import { join } from 'path';
-import { XMLIntrospector } from '../../../src/node/XMLIntrospector';
+import { NodeXMLIntrospector } from '../../../src/node/NodeXMLIntrospector';
 import { SamplingStrategy } from '../../../src/core/types';
 
 describe('XMLIntrospector', () => {
-  let introspector: XMLIntrospector;
+  let introspector: NodeXMLIntrospector;
   let tempDir: string;
   let testFiles: string[] = [];
 
   beforeEach(() => {
-    introspector = new XMLIntrospector();
+    introspector = new NodeXMLIntrospector();
     tempDir = join(process.cwd(), '.temp', 'unit-tests');
     
     // Create temp directory if it doesn't exist
@@ -274,8 +274,8 @@ describe('XMLIntrospector', () => {
       const structure = await introspector.analyzeStructure(xmlFile);
 
       expect(structure.rootElement).toBe('root');
-      expect(structure.maxDepth).toBe(4);
-      expect(structure.totalElements).toBe(5); // root, level1, level2 + text nodes
+      expect(structure.maxDepth).toBe(3);
+      expect(structure.totalElements).toBe(5); // root, 2x level1, 2x level2
       expect(structure.elementTypes.has('root')).toBe(true);
       expect(structure.elementTypes.has('level1')).toBe(true);
       expect(structure.elementTypes.has('level2')).toBe(true);

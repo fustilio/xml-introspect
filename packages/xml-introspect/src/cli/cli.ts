@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { XMLIntrospector } from '../node/XMLIntrospector.js';
-import { StreamingXMLIntrospector } from '../node/StreamingXMLIntrospector.js';
+import { NodeXMLIntrospector } from '../node/NodeXMLIntrospector.js';
 import { XMLFakerGenerator, XMLFakerOptions } from '../core/XMLFakerGenerator.js';
 import { FormatProcessor } from '@xml-introspect/data-loader';
 import { readFileSync, writeFileSync, unlinkSync, statSync } from 'fs';
@@ -282,7 +281,7 @@ program
             
             if (isLargeFile) {
               logVerbose(`📊 Large file detected (${fileSizeMB.toFixed(1)} MB), using streaming analysis...`);
-              const streamingIntrospector = new StreamingXMLIntrospector();
+              const streamingIntrospector = new NodeXMLIntrospector();
               xsd = await streamingIntrospector.generateXSDFromXML(actualFilePath, {
                 targetNamespace: options.namespace,
                 elementForm: options.elementForm as 'qualified' | 'unqualified',
@@ -290,7 +289,7 @@ program
               });
             } else {
               logVerbose(`📊 Small file detected (${fileSizeMB.toFixed(1)} MB), using standard analysis...`);
-              const introspector = new XMLIntrospector();
+              const introspector = new NodeXMLIntrospector();
               xsd = await introspector.generateXSDFromXML(actualFilePath, {
                 targetNamespace: options.namespace,
                 elementForm: options.elementForm as 'qualified' | 'unqualified',
@@ -311,7 +310,7 @@ program
             
             if (isLargeFile) {
               logVerbose(`📊 Large file detected (${fileSizeMB.toFixed(1)} MB), using streaming analysis...`);
-              const streamingIntrospector = new StreamingXMLIntrospector();
+              const streamingIntrospector = new NodeXMLIntrospector();
               xsd = await streamingIntrospector.generateXSDFromXML(actualFilePath, {
                 targetNamespace: options.namespace,
                 elementForm: options.elementForm as 'qualified' | 'unqualified',
@@ -319,7 +318,7 @@ program
               });
             } else {
               logVerbose(`📊 Small file detected (${fileSizeMB.toFixed(1)} MB), using standard analysis...`);
-              const introspector = new XMLIntrospector();
+              const introspector = new NodeXMLIntrospector();
               xsd = await introspector.generateXSDFromXML(actualFilePath, {
                 targetNamespace: options.namespace,
                 elementForm: options.elementForm as 'qualified' | 'unqualified',
@@ -341,7 +340,7 @@ program
             
             if (isLargeFile) {
               logVerbose(`📊 Large file detected (${fileSizeMB.toFixed(1)} MB), using streaming analysis...`);
-              const streamingIntrospector = new StreamingXMLIntrospector();
+              const streamingIntrospector = new NodeXMLIntrospector();
               xsd = await streamingIntrospector.generateXSDFromXML(actualFilePath, {
                 targetNamespace: options.namespace,
                 elementForm: options.elementForm as 'qualified' | 'unqualified',
@@ -349,7 +348,7 @@ program
               });
             } else {
               logVerbose(`📊 Small file detected (${fileSizeMB.toFixed(1)} MB), using standard analysis...`);
-              const introspector = new XMLIntrospector();
+              const introspector = new NodeXMLIntrospector();
               xsd = await introspector.generateXSDFromXML(actualFilePath, {
                 targetNamespace: options.namespace,
                 elementForm: options.elementForm as 'qualified' | 'unqualified',
@@ -368,7 +367,7 @@ program
           
           if (isLargeFile) {
             logVerbose(`📊 Large file detected (${fileSizeMB.toFixed(1)} MB), using streaming analysis...`);
-            const streamingIntrospector = new StreamingXMLIntrospector();
+            const streamingIntrospector = new NodeXMLIntrospector();
             xsd = await streamingIntrospector.generateXSDFromXML(actualFilePath, {
               targetNamespace: options.namespace,
               elementForm: options.elementForm as 'qualified' | 'unqualified',
@@ -376,7 +375,7 @@ program
             });
           } else {
             logVerbose(`📊 Small file detected (${fileSizeMB.toFixed(1)} MB), using standard analysis...`);
-            const introspector = new XMLIntrospector();
+            const introspector = new NodeXMLIntrospector();
             xsd = await introspector.generateXSDFromXML(actualFilePath, {
           targetNamespace: options.namespace,
           elementForm: options.elementForm as 'qualified' | 'unqualified',
@@ -430,7 +429,7 @@ program
       logVerbose(`🔧 Command: sample`);
       logVerbose('');
 
-      const introspector = new XMLIntrospector();
+      const introspector = new NodeXMLIntrospector();
       
       const sample = await introspector.generateSample(input, {
         maxElements: parseInt(options.maxElements),
@@ -470,7 +469,7 @@ program
       logVerbose(`🔧 Command: generate`);
       logVerbose('');
 
-      const introspector = new XMLIntrospector();
+      const introspector = new NodeXMLIntrospector();
         
         let xml: string;
         if (options.realistic) {
@@ -517,7 +516,7 @@ program
       logVerbose(`🔧 Command: roundtrip`);
       logVerbose('');
 
-      const introspector = new XMLIntrospector();
+      const introspector = new NodeXMLIntrospector();
         
         let result: string;
         if (options.realistic) {
@@ -559,7 +558,7 @@ program
       logVerbose(`🔧 Command: expand`);
       logVerbose('');
 
-      const introspector = new XMLIntrospector();
+      const introspector = new NodeXMLIntrospector();
         
         if (options.realistic) {
           const realisticXML = await introspector.generateRealisticExpandedXML(
@@ -607,7 +606,7 @@ program
       logVerbose(`🔧 Command: realistic`);
       logVerbose('');
 
-      const introspector = new XMLIntrospector();
+      const introspector = new NodeXMLIntrospector();
       
       const realisticXML = await introspector.generateRealisticSample(input, {
         seed: options.seed ? parseInt(options.seed) : undefined,
@@ -645,7 +644,7 @@ program
       logVerbose(`🔧 Command: validate`);
       logVerbose('');
 
-      const introspector = new XMLIntrospector();
+      const introspector = new NodeXMLIntrospector();
       
       // Process URL or file input
       const projectId = getProjectId(xml, 'validate');
@@ -665,7 +664,7 @@ program
           console.log('❌ XML validation failed:');
           validation.errors.forEach(error => {
             // Handle different error formats from xmllint-wasm
-            const errorMessage = error?.message || error?.toString() || String(error);
+            const errorMessage = (error as any)?.message || error?.toString() || String(error);
             console.log(`  - ${errorMessage}`);
           });
         }

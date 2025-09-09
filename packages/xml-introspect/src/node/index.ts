@@ -6,8 +6,6 @@
  */
 
 export { NodeXMLIntrospector } from './NodeXMLIntrospector.js';
-export { XMLIntrospector } from './XMLIntrospector.js';
-export { StreamingXMLIntrospector } from './StreamingXMLIntrospector.js';
 export { NodeXSDParser } from './NodeXSDParser.js';
 
 // Re-export core functionality for convenience
